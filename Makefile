@@ -1,5 +1,5 @@
 PY ?= python3
-.PHONY: test quick all repro m4 extension analysis report clean
+.PHONY: test quick all repro m4 extension analysis report clean parallel
 
 test:            ## unit tests (< 1 min)
 	cd tests && $(PY) -m pytest -q
@@ -29,3 +29,6 @@ all: repro m4 extension report
 
 clean:
 	rm -rf results_quick report/*.aux report/*.log report/*.bbl report/*.blg report/*.out
+
+parallel:        ## all M4 + extension jobs on many cores (restart-safe), e.g. make parallel N=8
+	cd code && $(PY) run_parallel.py $(N)
