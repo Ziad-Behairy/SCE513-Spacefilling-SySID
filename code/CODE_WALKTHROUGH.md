@@ -1,4 +1,4 @@
-# Code walkthrough — how the M3 code works, in plain English
+# Code walkthrough — how the code works (M3 core + M4 additions), in plain English
 
 This file explains every part of the code so that I can explain it in the M5 live-code check.
 Read it next to the code. Order = the order in which data flows.
@@ -135,3 +135,90 @@ column of z).
   Instead: 20 random seeds, an independent finer grid (30³), and a different initial state.
 * **What does the Schroeder result show?** Same spectrum, crest factor 1.88 (paper 1.87); it spreads
   x1 and x2 but not u. The optimized signal spreads u more (Fig. 4 bottom vs middle rows).
+
+---
+
+# M4 additions
+
+## `run_mc_phases.py` — Monte Carlo rerun that keeps the designed signals
+Same optimizer, settings and seeds (1–20) as `run_sec46.py`, but it **stores the phases** after
+16 iterations (`phi_16`), after 20 iterations (`phi_20`) and at the end (`phi`). M3 stored only the
+costs; the extension needs the actual signals. The SciPy callback receives the current point after
+every iteration (`intermediate_result.x`), so we copy it at iterations 16 and 20.
+Check: the final costs equal the M3 ones exactly (same seed → same numbers), reported as `\mRerunDiff`.
+
+## `run_h1_fmincon.py` — a closer test of hypothesis H1
+Question: does an optimizer that behaves like MATLAB `fmincon` with default options stop near 3.88?
+* `fmincon` default for a smooth problem: quasi-Newton with a BFGS Hessian, gradient by **forward
+  finite differences** if the user gives none, and `MaxFunctionEvaluations = 3000`.
+* We copy that: `scipy.optimize.minimize(method="BFGS", jac="2-point")`. `jac="2-point"` means the
+  gradient is built from 1 + 184 cost evaluations (one per phase). A counter inside `f` raises an
+  exception at 3000 evaluations, exactly like the budget stop. We keep the best cost seen.
+* 3000 / 185 ≈ 16 gradients → the optimizer only takes about 16 steps.
+Not the same algorithm as fmincon (interior-point), so the result supports H1 but does not prove it.
+
+## `run_eps_reopt.py` — ε with re-optimisation
+M3 only re-evaluated the seed-0 optimum with other ε values. Here we re-optimise for each ε
+(300 iterations) and then evaluate every optimum with the **same** ε = 1e-3, so the signals can be
+compared fairly. Result: ε changes the numbers in the cost a lot but changes the designed signal little.
+
+## Extension — `code/ext/`
+
+### The question
+The paper says "better coverage → better model" but never fits a model. We test it:
+* **Q1** Same spectrum, same energy, same length: does the optimized input give a more accurate model?
+* **Q2** In practice the true system is unknown. If we first identify a rough model from a random-phase
+  experiment and design the input **on that model** (surrogate), do we keep the benefit?
+
+### `ext_config.py`
+All extension settings: noise levels (noise-free, 40 dB, 30 dB), the model basis, λ grid, test seeds.
+
+### `ident.py` — the model and how it is estimated
+* The kinematics `x1[k+1] = x1[k] + Ts*x2[k]` are known physics. The **force law**
+  `g(u, x1, x2) = dx2/dt` is unknown → black box.
+* Model: `g = θᵀ φ(z)`, with φ = [1, u/400, x1/2, x2/20, 343 Gaussian bumps on a 7×7×7 grid].
+  It is **linear in θ**, so estimation is least squares (Ljung Ch. 7).
+* Data: from one measured period, target `y_k = (x2[k+1] − x2[k]) / Ts`, regressor `z_k`.
+  (Steady state is periodic, so `x[N] = x[0]` — that is why `np.roll` is used.)
+* Ridge: `θ = (ΦᵀΦ + λ n I)⁻¹ Φᵀ y` (offset not shrunk). Without ridge, bumps that see no data
+  would be undetermined.
+* λ is chosen by **5-fold cross-validation on the training data only** (contiguous blocks,
+  because it is a time series). The test data are never used to choose anything.
+* Why Gaussian bumps? They are **local**: a bump only learns where data exist. So model accuracy
+  depends directly on where the data are — the exact property the space-filling design changes.
+
+### `surrogate.py` — designing on an identified model
+Same chain as `cost.objective`, but the simulator uses the identified `ĝ` instead of the true force
+law. The adjoint needs `∂ĝ/∂u, ∂ĝ/∂x1, ∂ĝ/∂x2`; for a Gaussian bump
+`∂/∂z exp(−|z−c|²/2w²) = −exp(...)·(z−c)/w²` (in scaled units, then divided by the scale).
+Numba compiles these loops (speed only). Checked against finite differences in `tests/`.
+
+### `run_extension.py` — the experiment, per seed and noise level
+1. Designs, all with the same 184 lines and amplitudes: R (random phases φ0), S (Schroeder),
+   O16/O20/Ofull (optimized on the true model), Osur (20 iterations on the model identified from R),
+   Oiter (re-identify from the Osur data, 20 more iterations), Osur100 (100 iterations on the surrogate).
+2. Apply each input to the **true** system, add the same **absolute** sensor noise to the measured states
+   (the noise std is fixed by the reference random-phase signal; a sensor does not know the input).
+   The noise sequence is the same for all designs of a seed → paired comparison.
+3. Identify with `ident.fit`.
+4. Evaluate on data never used for fitting:
+   * `e_uni`: one-step NRMSE of ĝ on 20 000 uniform random points in D_z (the region of interest),
+   * `e_sim160/240`: free-run simulation NRMSE on 5 new random-phase multisines (std 160 N and 240 N),
+   * error vs. local training-data density (explains *why*).
+
+### `m4_analysis.py` — statistics
+* Median and IQR over 20 seeds; **paired one-sided Wilcoxon signed-rank test** against R
+  (non-parametric, no normality assumption, uses the pairing by seed).
+* Spearman rank correlation between the space-filling cost on the true system and the model error:
+  is the paper's cost a good *predictor* of model quality?
+
+### Questions I should be ready for (extension)
+* **Is the comparison fair?** Same amplitude spectrum, power, length, model class, λ selection rule
+  and noise sequence; only the phases differ.
+* **Why can a model from the optimized input be worse on random-phase test signals?** The test signal
+  then lives where the random-phase training data are dense; coverage spreads the same number of samples
+  over a larger region (bias–variance trade-off). Check the free-run results at 160 N vs 240 N.
+* **Noise in the regressors** (errors-in-variables): the measured states appear in φ(z), so LS is biased
+  (Söderström 2007). Same bias for all designs, but larger at 30 dB. Instrumental variables would be the fix.
+* **Why does designing on a wrong model still help?** The surrogate is accurate near the data it was
+  trained on and linear outside; pushing samples outward on it still pushes them outward on the true system.

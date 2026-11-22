@@ -1,4 +1,6 @@
-# Versions used to produce the M3 results (Python 3.13.x, Linux x86_64, CPU only)
+# Versions used to produce the M4 results (Python 3.13, Linux x86_64, CPU only)
 numpy==2.5.3
 scipy==1.18.1
 matplotlib==3.11.2
+numba==0.68.1        # extension only: fast simulation of the identified model
+pytest==9.1.1        # unit tests

@@ -90,4 +90,5 @@ PAPER = {
     "CF_opt": 3.67,
 }
 
-RESULTS_DIR = "results"
+import os as _os
+RESULTS_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "results")

@@ -26,7 +26,7 @@ QUICK = "--quick" in sys.argv
 if QUICK:
     cfg.OPT_MAXITER = 20
     cfg.ADAM_STEPS = 20
-    cfg.RESULTS_DIR = "results_quick"
+    cfg.RESULTS_DIR = cfg.RESULTS_DIR.replace("results", "results_quick")
 
 import diagnostics
 import run_sec44

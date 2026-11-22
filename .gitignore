@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
+.venv/
+results_quick/
+report/*.aux
+report/*.log
+report/*.out
+report/*.bbl
+report/*.blg
 *.mp4
+logs/
