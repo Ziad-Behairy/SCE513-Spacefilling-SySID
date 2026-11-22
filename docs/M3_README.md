@@ -1,10 +1,10 @@
-# SCE 513 Course Project — M3 Reproduction Package
+# SCE 513 Course Project: M3 Reproduction Package
 
 **Student:** Ziad Aboelkhir (g202622300) · **Course:** SCE 513 System Identification, Term 261, KFUPM
 **Paper reproduced:** M. Kiss, R. Tóth, M. Schoukens, "Space-filling input design for nonlinear
 state-space identification", *IFAC-PapersOnLine* 58(15), 562–567, 2024 (SYSID 2024).
 DOI [10.1016/j.ifacol.2024.08.589](https://doi.org/10.1016/j.ifacol.2024.08.589) · [arXiv:2405.18207](https://arxiv.org/abs/2405.18207)
-**Scope (approved):** Secs. 4.4–4.6 — targets T1–T7 (see the M2 protocol and the M3 report).
+**Scope (approved):** Secs. 4.4–4.6: targets T1–T7 (see the M2 protocol and the M3 report).
 
 ## 1. Environment
 
@@ -38,7 +38,7 @@ python main.py --quick    # 1-2 minute smoke test (20 iterations, 2 Monte Carlo 
 ```
 
 To save time, the Monte Carlo can be split over several terminals (one per CPU core), e.g.
-`python run_sec46.py 1 5`, `python run_sec46.py 6 10`, ... — finished seeds are skipped on re-runs.
+`python run_sec46.py 1 5`, `python run_sec46.py 6 10`, ...: finished seeds are skipped on re-runs.
 On an 8-core laptop the 20 runs take about 20–30 minutes this way.
 
 `main.py` runs, in this order:
@@ -86,7 +86,7 @@ Steps 3–8 need the output of step 2. `results/numbers.tex` holds every number 
 ## 6. Documented choices and deviations
 
 * Dynamics as **Eq. (9)**: 1/m multiplies only the velocity equation (Eq. 11 is a notation error).
-* ε = 1e-3, 20³ grid with `linspace`, steady state from P = 8 periods with an explicit check — not stated in the paper.
+* ε = 1e-3, 20³ grid with `linspace`, steady state from P = 8 periods with an explicit check: not stated in the paper.
   P was raised from the M2 value 5 to 8 because the first optimized signal failed the check at P = 5 (see `results/old_P5/`).
 * Optimizer: SciPy L-BFGS-B (the paper used MATLAB `fmincon`, options not reported).
 * Gradient: hand-derived reverse-mode (adjoint) gradient instead of PyTorch autograd, verified against finite differences (D6).

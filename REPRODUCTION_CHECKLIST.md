@@ -15,5 +15,5 @@
 
 ## Diagnostic checks (all pass)
 D1 input dimensions/units · D2 free decay · D3 steady state · D4 kernel unit test · D5 cost bound ·
-D6 adjoint vs finite differences · D7 Euler stability · D8 grid — `code/diagnostics.py`, `results/diagnostics.json`,
+D6 adjoint vs finite differences · D7 Euler stability · D8 grid: `code/diagnostics.py`, `results/diagnostics.json`,
 and the unit tests in `tests/` (also surrogate-model gradient check).

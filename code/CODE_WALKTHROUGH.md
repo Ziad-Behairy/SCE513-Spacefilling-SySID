@@ -1,4 +1,4 @@
-# Code walkthrough — how the code works (M3 core + M4 additions), in plain English
+# Code walkthrough: how the code works (M3 core + M4 additions), in plain English
 
 This file explains every part of the code so that I can explain it in the M5 live-code check.
 Read it next to the code. Order = the order in which data flows.
@@ -88,10 +88,10 @@ would need 185 cost evaluations per gradient (≈ 50 s); the exact gradient cost
 PyTorch (automatic differentiation) was planned in M2 but could not be installed, so I wrote the
 chain rule myself. This is the same thing autograd does internally ("reverse mode").
 
-**Step A — cost to samples.** With w = z/σ and a_i = dC/dd_i = −1/(n(ε + d_i)²):
+**Step A: cost to samples.** With w = z/σ and a_i = dC/dd_i = −1/(n(ε + d_i)²):
 dd_i/dw_k = E_ik·(w̃_i − w_k), so dC/dw_k = Σ_i a_i E_ik (w̃_i − w_k), and dC/dz_k = dC/dw_k / σ.
 
-**Step B — samples to inputs, backwards through time.** x_{k+1} depends on x_k and u_k:
+**Step B: samples to inputs, backwards through time.** x_{k+1} depends on x_k and u_k:
 
     x1[k+1] = x1[k] + Ts·x2[k]
     x2[k+1] = x2[k] + Ts·f2(x1[k], x2[k], u[k])
@@ -103,13 +103,13 @@ Let λ_k = total derivative of the cost with respect to x_k. Going from the end 
     dC/du[k] = (Ts/m)·λ2[k+1]
 
 with ∂f2/∂x1 = (−s + s·l·a²/(x1² + a²)^{3/2})/m. This is the transpose of the Euler Jacobian
-applied backwards — the "adjoint" equation.
+applied backwards: the "adjoint" equation.
 
-**Step C — periodic input.** u at step p·N + k is the same number as u_k, so the gradients of all
+**Step C: periodic input.** u at step p·N + k is the same number as u_k, so the gradients of all
 8 copies are added: `gU_full.reshape(P, N).sum(axis=0)`, plus the direct part (u is the first
 column of z).
 
-**Step D — inputs to phases:** `signals.multisine_grad`.
+**Step D: inputs to phases:** `signals.multisine_grad`.
 
 **How I know it is right:** check D6 compares it with central finite differences
 (C(φ + h) − C(φ − h))/(2h) on 10 random phases: error ≈ 1e-10 of the gradient size.
@@ -140,7 +140,7 @@ column of z).
 
 # M4 additions
 
-## `run_mc_phases.py` — Monte Carlo rerun that keeps the designed signals
+## `run_mc_phases.py`: Monte Carlo rerun that keeps the designed signals
 Same optimizer, settings and seeds (1–20) as `run_sec46.py`, but it **stores the phases** after
 16 iterations (`phi_16`), after 20 iterations (`phi_20`) and at the end (`phi`). M3 stored only the
 costs; the extension needs the actual signals. The SciPy callback receives the current point after
@@ -150,7 +150,7 @@ On another OS/BLAS (my Windows laptop) the first 20 iterations agree to ~1e-6, b
 differences (1e-15) grow over 1000 iterations of a non-convex optimisation, so the end points differ by a
 few percent. This is normal for long nonlinear optimisations and is reported honestly in the report.
 
-## `run_h1_fmincon.py` — a closer test of hypothesis H1
+## `run_h1_fmincon.py`: a closer test of hypothesis H1
 Question: does an optimizer that behaves like MATLAB `fmincon` with default options stop near 3.88?
 * `fmincon` default for a smooth problem: quasi-Newton with a BFGS Hessian, gradient by **forward
   finite differences** if the user gives none, and `MaxFunctionEvaluations = 3000`.
@@ -160,12 +160,12 @@ Question: does an optimizer that behaves like MATLAB `fmincon` with default opti
 * 3000 / 185 ≈ 16 gradients → the optimizer only takes about 16 steps.
 Not the same algorithm as fmincon (interior-point), so the result supports H1 but does not prove it.
 
-## `run_eps_reopt.py` — ε with re-optimisation
+## `run_eps_reopt.py`: ε with re-optimisation
 M3 only re-evaluated the seed-0 optimum with other ε values. Here we re-optimise for each ε
 (300 iterations) and then evaluate every optimum with the **same** ε = 1e-3, so the signals can be
 compared fairly. Result: ε changes the numbers in the cost a lot but changes the designed signal little.
 
-## Extension — `code/ext/`
+## Extension: `code/ext/`
 
 ### The question
 The paper says "better coverage → better model" but never fits a model. We test it:
@@ -176,27 +176,27 @@ The paper says "better coverage → better model" but never fits a model. We tes
 ### `ext_config.py`
 All extension settings: noise levels (noise-free, 40 dB, 30 dB), the model basis, λ grid, test seeds.
 
-### `ident.py` — the model and how it is estimated
+### `ident.py`: the model and how it is estimated
 * The kinematics `x1[k+1] = x1[k] + Ts*x2[k]` are known physics. The **force law**
   `g(u, x1, x2) = dx2/dt` is unknown → black box.
 * Model: `g = θᵀ φ(z)`, with φ = [1, u/400, x1/2, x2/20, 343 Gaussian bumps on a 7×7×7 grid].
   It is **linear in θ**, so estimation is least squares (Ljung Ch. 7).
 * Data: from one measured period, target `y_k = (x2[k+1] − x2[k]) / Ts`, regressor `z_k`.
-  (Steady state is periodic, so `x[N] = x[0]` — that is why `np.roll` is used.)
+  (Steady state is periodic, so `x[N] = x[0]`: that is why `np.roll` is used.)
 * Ridge: `θ = (ΦᵀΦ + λ n I)⁻¹ Φᵀ y` (offset not shrunk). Without ridge, bumps that see no data
   would be undetermined.
 * λ is chosen by **5-fold cross-validation on the training data only** (contiguous blocks,
   because it is a time series). The test data are never used to choose anything.
 * Why Gaussian bumps? They are **local**: a bump only learns where data exist. So model accuracy
-  depends directly on where the data are — the exact property the space-filling design changes.
+  depends directly on where the data are: the exact property the space-filling design changes.
 
-### `surrogate.py` — designing on an identified model
+### `surrogate.py`: designing on an identified model
 Same chain as `cost.objective`, but the simulator uses the identified `ĝ` instead of the true force
 law. The adjoint needs `∂ĝ/∂u, ∂ĝ/∂x1, ∂ĝ/∂x2`; for a Gaussian bump
 `∂/∂z exp(−|z−c|²/2w²) = −exp(...)·(z−c)/w²` (in scaled units, then divided by the scale).
 Numba compiles these loops (speed only). Checked against finite differences in `tests/`.
 
-### `run_extension.py` — the experiment, per seed and noise level
+### `run_extension.py`: the experiment, per seed and noise level
 1. Designs, all with the same 184 lines and amplitudes: R (random phases φ0), S (Schroeder),
    O16/O20/Ofull (optimized on the true model), Osur (20 iterations on the model identified from R),
    Oiter (re-identify from the Osur data, 20 more iterations), Osur100 (100 iterations on the surrogate).
@@ -209,7 +209,7 @@ Numba compiles these loops (speed only). Checked against finite differences in `
    * `e_sim160/240`: free-run simulation NRMSE on 5 new random-phase multisines (std 160 N and 240 N),
    * error vs. local training-data density (explains *why*).
 
-### `m4_analysis.py` — statistics
+### `m4_analysis.py`: statistics
 * Median and IQR over 20 seeds; **paired one-sided Wilcoxon signed-rank test** against R
   (non-parametric, no normality assumption, uses the pairing by seed).
 * Spearman rank correlation between the space-filling cost on the true system and the model error:
@@ -226,12 +226,12 @@ Numba compiles these loops (speed only). Checked against finite differences in `
 * **Why does designing on a wrong model still help?** The surrogate is accurate near the data it was
   trained on and linear outside; pushing samples outward on it still pushes them outward on the true system.
 
-## `run_all.py` — the one main script
+## `run_all.py`: the one main script
 Runs the numbered workflow in order: M3 core (`main.py`), M4 + extension runs on many cores
 (`run_parallel.py`), the fixed-λ robustness check, `m4_analysis.py`, the drawings, and the LaTeX build.
 `--analysis` redoes only the cheap last steps from the stored results.
 
-## `make_illustrations.py` — drawings only (no results)
+## `make_illustrations.py`: drawings only (no results)
 * `fig_system_3d.png`: the test system rendered in 3-D with PyVista (VTK). Real `a` and `l`, the spring is a
   tube along a helix from the anchor to the cart. Labels are placed by projecting 3-D points to pixels
   (`WorldToDisplay`), then drawn with Matplotlib.

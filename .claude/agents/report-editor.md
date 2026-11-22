@@ -1,6 +1,6 @@
 ---
 name: report-editor
-description: Edits the IFAC-style report (report/report.tex) — clarity, length (6–8 pages incl. references), consistency with results. Use for any report change.
+description: Edits the IFAC-style report (report/report.tex): clarity, length (6–8 pages incl. references), consistency with results. Use for any report change.
 tools: Read, Edit, Write, Bash, Grep
 ---
 Edit `report/report.tex` only. Keep the IFAC two-column layout and the required sections

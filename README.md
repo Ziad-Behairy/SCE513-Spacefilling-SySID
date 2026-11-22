@@ -1,4 +1,4 @@
-# SCE 513 Course Project — Reproducibility Package (M4)
+# SCE 513 Course Project: Reproducibility Package (M4)
 
 **Student:** Ziad Aboelkhir (g202622300) · **Course:** SCE 513 System Identification, Term 261, KFUPM ·
 **Instructor:** Prof. Mujahed M. Al-Dhaifallah
@@ -15,7 +15,7 @@ coverage give better identified models, also when the design model is itself ide
 | Final report (IFAC-style, two columns) | `report/report.pdf` (source `report/report.tex`, `report/refs.bib`) |
 | Every figure, table and number of the report | `results/` (generated; `numbers.tex`, `numbers_m4.tex`) |
 | Source code | `code/` (walkthrough: `code/CODE_WALKTHROUGH.md`) |
-| Data | none external — see `data_instructions.md` |
+| Data | none external: see `data_instructions.md` |
 | Unit tests | `tests/` (`make test`) |
 | Presentation (M5) | `presentation/` |
 
@@ -72,18 +72,18 @@ converged costs differ by a few percent (reported in the report, Sec. 3). Use th
 | `code/cost.py` | grid, kernel densities, cost (5)–(8) and its gradient | Eqs. 5–8 |
 | `code/optimize.py` | L-BFGS-B wrapper, Adam cross-check | Sec. 4.4 |
 | `code/run_sec44.py … run_sec46.py` | T1–T7 | Secs. 4.4–4.6 |
-| `code/diagnostics.py`, `validation.py` | checks D1–D8, V1–V6 | — |
+| `code/diagnostics.py`, `validation.py` | checks D1–D8, V1–V6 | n/a |
 | `code/run_mc_phases.py` | M4: MC rerun that stores phases after 16, 20 and all iterations | Sec. 4.6 |
-| `code/run_h1_fmincon.py` | M4: fmincon-like BFGS with forward differences, 3000 evaluations (H1) | — |
-| `code/run_eps_reopt.py` | M4: ε sensitivity with re-optimisation | — |
-| `code/ext/ident.py` | extension: RBF ridge least squares with cross-validated λ | — |
-| `code/ext/surrogate.py` | extension: simulation + adjoint gradient of the identified model | — |
-| `code/ext/run_extension.py` | extension experiments (8 designs × 3 noise levels × 20 seeds) | — |
-| `code/ext/run_fixed_lambda.py` | extension robustness: same fixed ridge λ for every design | — |
-| `code/run_parallel.py` | runs all M4/extension seeds on many cores (`make parallel N=8`) | — |
-| `code/m4_analysis.py` | M4 figures, tables, statistics, `numbers_m4.tex` | — |
+| `code/run_h1_fmincon.py` | M4: fmincon-like BFGS with forward differences, 3000 evaluations (H1) | n/a |
+| `code/run_eps_reopt.py` | M4: ε sensitivity with re-optimisation | n/a |
+| `code/ext/ident.py` | extension: RBF ridge least squares with cross-validated λ | n/a |
+| `code/ext/surrogate.py` | extension: simulation + adjoint gradient of the identified model | n/a |
+| `code/ext/run_extension.py` | extension experiments (8 designs × 3 noise levels × 20 seeds) | n/a |
+| `code/ext/run_fixed_lambda.py` | extension robustness: same fixed ridge λ for every design | n/a |
+| `code/run_parallel.py` | runs all M4/extension seeds on many cores (`make parallel N=8`) | n/a |
+| `code/m4_analysis.py` | M4 figures, tables, statistics, `numbers_m4.tex` | n/a |
 | `code/make_illustrations.py` | 3-D drawing of the test system and 3-D view of the samples (T4) | Sec. 4.1, Fig. 5 |
-| `code/run_all.py` | **one main script**: runs the whole numbered workflow | — |
+| `code/run_all.py` | **one main script**: runs the whole numbered workflow | n/a |
 
 ## 5. Results → report map
 
@@ -99,7 +99,7 @@ converged costs differ by a few percent (reported in the report, Sec. 3). Use th
 | Fig. 4 (slices T5, Schroeder T6, cost history) | `fig6_slices.png`, `fig7_schroeder.png`, `fig_cost_history.png` | `make_figures.py` |
 | Fig. 5 (3-D samples, T4) | `fig_states_3d.png` | `make_illustrations.py` |
 | Fig. 6 (T7 + H1) | `fig_h1.png`, `h1_fmincon/`, `mc_phases/` | `m4_analysis.py` |
-| Fig. 7 (surrogate loop) | drawn in LaTeX | — |
+| Fig. 7 (surrogate loop) | drawn in LaTeX | n/a |
 | Fig. 8 (extension) | `fig_ext_accuracy.png`, `fig_ext_mechanism.png` | `m4_analysis.py` |
 | Extension robustness (fixed λ) | `ext_fixed_lambda.json` | `ext/run_fixed_lambda.py` |
 | In the package only | `fig5_3d.png` (M3 version of T4), `fig8_boxplot.png` (M3 version of T7), `fig_diagnostics.png` | `make_figures.py` |

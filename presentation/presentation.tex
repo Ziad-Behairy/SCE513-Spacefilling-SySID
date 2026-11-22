@@ -89,15 +89,15 @@ Status: T1, T3--T5 reproduced; T6 Schroeder CF reproduced, optimised CF partiall
 \item fmincon defaults: finite-difference gradient (185 evals) and 3000 evals $\Rightarrow\approx16$ gradients
 \item fmincon-like BFGS-FD, 3000 evals: median \mHoneMed{} (\mHoneMin--\mHoneMax)
 \item L-BFGS-B after 20 it.: median \nMCtMedian{} (paper $\approx$3.65)
-\item Consistent with early stopping --- plausible, not proven
-\item Converged: \mCfullMed{} --- far lower
+\item Consistent with early stopping: plausible, not proven
+\item Converged: \mCfullMed{}, far lower
 \end{itemize}
 \end{column}\end{columns}
 \end{frame}
 
 \begin{frame}{Extension: does better coverage give a better model?}
 \begin{itemize}
-\item \textbf{Q1} Same spectrum, energy, length --- is the identified model more accurate?
+\item \textbf{Q1} Same spectrum, energy and length: is the identified model more accurate?
 \item \textbf{Q2} True system unknown: design on a model \alert{identified} from a first random-phase experiment
 (surrogate), optionally re-identify and redesign (iterative).
 \end{itemize}
@@ -117,7 +117,7 @@ Stats & 20 paired seeds, one-sided Wilcoxon vs.\ random\\
 the cost ranks design families by error ($\rho=\mRhoforty$), not converged designs.
 \end{frame}
 
-\begin{frame}{Why --- and the price}
+\begin{frame}{Why it works, and the price}
 \centering\includegraphics[width=0.95\textwidth]{fig_ext_mechanism.png}\\
 \small Error falls with local data density; optimised inputs leave no empty regions.
 Price: on random-phase test signals at the design level the random model is better (\mXRfortyesimonesixty\,\% vs.\
@@ -130,7 +130,7 @@ Price: on random-phase test signals at the design level the random model is bett
 \item $\epsilon$, steady-state rule, Schroeder index: my choices (fixed before results, M2).
 \item Extension: one system, one model class, simulated sensor noise; noisy regressors give
 errors-in-variables bias, smaller for designs that spread the states (noise-free case isolates coverage).
-\item Surrogate design: 20 iterations; 100 iterations on a fixed surrogate helped little --- re-identify instead.
+\item Surrogate design: 20 iterations; 100 iterations on a fixed surrogate helped little; re-identify instead.
 \item Converged optima differ across machines (round-off grows along the path): compare statistics, not single runs.
 \end{itemize}
 \end{frame}

@@ -1,4 +1,4 @@
-# SCE 513 Course Project — Claude Code guide
+# SCE 513 Course Project: Claude Code guide
 
 Individual course project of **Ziad Aboelkhir (g202622300)**, SCE 513 System Identification,
 KFUPM Term 261, instructor Prof. Mujahed M. Al-Dhaifallah.
@@ -6,7 +6,7 @@ KFUPM Term 261, instructor Prof. Mujahed M. Al-Dhaifallah.
 Reproduction of: M. Kiss, R. Tóth, M. Schoukens, "Space-filling input design for nonlinear
 state-space identification", IFAC-PapersOnLine 58(15):562–567, 2024 (SYSID 2024),
 doi:10.1016/j.ifacol.2024.08.589, arXiv:2405.18207. Approved scope: Secs. 4.4–4.6 (targets T1–T7).
-Extension (bonus): "From coverage to accuracy" — see `report/report.tex` §5 and `code/ext/`.
+Extension (bonus): "From coverage to accuracy": see `report/report.tex` §5 and `code/ext/`.
 
 ## Milestones
 - M1 selection, M2 protocol, M3 checkpoint: done.
@@ -57,8 +57,8 @@ make report      # analysis figures + numbers_m4.tex + LaTeX -> report/report.pd
 7. Style for written text: short, clear, student voice; no marketing language.
 
 ## Subagents (`.claude/agents/`)
-- `verifier` — independent check: clean clone, `make test`, every number in report vs. result files,
+- `verifier`: independent check: clean clone, `make test`, every number in report vs. result files,
   requirement checklist (Sec. 15 of the course requirements). Use before any submission.
-- `report-editor` — edits `report/report.tex` within the 6–8 page IFAC limit.
-- `slides-builder` — builds the M5 10-minute deck from the report.
-- `defense-coach` — drills Ziad with likely oral-defense questions and checks his answers.
+- `report-editor`: edits `report/report.tex` within the 6–8 page IFAC limit.
+- `slides-builder`: builds the M5 10-minute deck from the report.
+- `defense-coach`: drills Ziad with likely oral-defense questions and checks his answers.

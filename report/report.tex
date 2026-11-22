@@ -1,4 +1,4 @@
-% SCE 513 Course Project -- M4 final report (IFAC two-column layout)
+% SCE 513 Course Project: M4 final report (IFAC two-column layout)
 % Every result number is a macro from ../results/numbers.tex (M3 scripts) or
 % ../results/numbers_m4.tex (m4_analysis.py). Do not type numbers by hand.
 \documentclass[10pt,a4paper,twocolumn]{article}
@@ -219,11 +219,11 @@ $C_\theta$ optimised, full run & 3.88 & \nCopt{} (\nNit{} it.)\\
 $C_\theta$ after 16 / 20 it. & 3.88 & \nEaC{} / \nEbC\\
 Ratio $C_{init}/C_{opt}$ & 69 (text), 74.0 & \nRatio{} (full); \nEbR{} (20 it.)\\
 MC final $C_\theta$, 20 it. & $\approx$3.65 [2.9--5.5] & \nMCtMedian{} [\nMCtMin--\nMCtMax]\\
-MC final $C_\theta$, full & -- & \mCfullMed{} [\mCfullMin--\mCfullMax]\\
-MC final $C_\theta$, BFGS-FD & -- & \mHoneMed{} [\mHoneMin--\mHoneMax]\\
+MC final $C_\theta$, full & n/a & \mCfullMed{} [\mCfullMin--\mCfullMax]\\
+MC final $C_\theta$, BFGS-FD & n/a & \mHoneMed{} [\mHoneMin--\mHoneMax]\\
 CF Schroeder & 1.87 & \nCFschA{} (+\nRelCFsch\,\%)\\
 CF optimised & 3.67 & \nCFopt; MC 20 it.\ \mCFtwentyMed{} [\mCFtwentyMin--\mCFtwentyMax]\\
-Coverage $\kappa$ rand./Sch./opt. & -- & \nKapInit{} / \nKapSch{} / \nKapOpt{}\,\%\\
+Coverage $\kappa$ rand./Sch./opt. & n/a & \nKapInit{} / \nKapSch{} / \nKapOpt{}\,\%\\
 \bottomrule\end{tabular}\end{table}
 
 \begin{figure}[t]\centering
@@ -336,8 +336,8 @@ ranking and the early-stopped values match; the converged values are lower, cons
 \setlength{\bibsep}{1pt}
 \bibliography{refs}}
 
-{\footnotesize\textbf{Reproducibility.} Code, data-generation scripts, seeds, versions and every figure/number
-in this report: \texttt{M4\_g202622300\_Reproducibility\_Package.zip} (\texttt{README.md}; one main script
+{\footnotesize\raggedright\textbf{Reproducibility.} Code, data-generation scripts, seeds, versions and every
+figure and number in this report are in \texttt{M4\_g202622300\_\allowbreak Reproducibility\_\allowbreak Package.zip} (\texttt{README.md}; one main script
 \texttt{python code/run\_all.py}). Software: Python 3.13, NumPy \citep{Harris2020}, SciPy \citep{Virtanen2020},
 Numba \citep{Lam2015}, Matplotlib \citep{Hunter2007}, PyVista \citep{Sullivan2019} (Fig.~\ref{fig:sys}a only).
 No data, code or figures of the authors are used or redistributed; all data are simulated.

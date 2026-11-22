@@ -382,7 +382,7 @@ def s06_compare():
     d4, = s4.plot([], [], ".", color=C_OPT, ms=3.5, alpha=0.7)
     fig.text(0.62, 0.845, "u – x1", ha="center", fontsize=20, color=MUTED)
     fig.text(0.88, 0.845, "x1 – x2", ha="center", fontsize=20, color=MUTED)
-    cap = caption(fig, "Same 184 frequencies and the same energy (std 160 N) — only the phases are different.")
+    cap = caption(fig, "Same 184 frequencies and the same energy (std 160 N): only the phases are different.")
     cap2 = caption(fig, f"Optimized: the mass travels further and the samples reach the borders "
                         f"({100 * S44['kappa_opt']:.0f} % vs {100 * S44['kappa_init']:.0f} % of the grid covered).",
                    alpha=0, weight="bold", color=C_OPT)
@@ -469,7 +469,7 @@ def s08_montecarlo():
               f"{st['iters_to_paper']['max']} iterations.", INK),
         (6.0, f"Stopped at 20 iterations: median cost {st['C_it20']['median']:.2f}  "
               f"(paper ≈ 3.65).", GREEN),
-        (9.0, f"Run to the end (≈1000 iterations): median {st['C_opt']['median']:.2f} — much lower.", C_OPT),
+        (9.0, f"Run to the end (≈1000 iterations): median {st['C_opt']['median']:.2f}, much lower.", C_OPT),
         (12.0, "→ The paper's optimizer most likely stopped early (MATLAB fmincon default limits).", INK),
     ]
     texts = []
