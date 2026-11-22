@@ -1,0 +1,301 @@
+% SCE 513 Course Project -- M4 final report (IFAC two-column layout)
+% Every result number is a macro from ../results/numbers.tex (M3 scripts) or
+% ../results/numbers_m4.tex (m4_analysis.py). Do not type numbers by hand.
+\documentclass[10pt,a4paper,twocolumn]{article}
+\usepackage[a4paper,left=17mm,right=17mm,top=20mm,bottom=25mm,columnsep=8mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}\renewcommand{\ttdefault}{pcr}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx,booktabs,multirow,xcolor}
+\usepackage[round,authoryear]{natbib}
+\usepackage[font=footnotesize,labelfont=bf,labelsep=period]{caption}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}\usepackage[section]{placeins}\usepackage{dblfloatfix}\usepackage{tikz}\usetikzlibrary{arrows.meta,positioning}
+\titleformat{\section}{\normalfont\normalsize\bfseries\centering}{\thesection.}{0.5em}{\MakeUppercase}
+\titleformat{\subsection}{\normalfont\normalsize\itshape}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titlespacing*{\subsection}{0pt}{5pt}{2pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{3pt}
+\setlength{\textfloatsep}{8pt}\setlength{\floatsep}{6pt}
+\setlength{\abovecaptionskip}{3pt}
+\graphicspath{{../results/}}
+\input{../results/numbers.tex}
+\input{../results/numbers_m4.tex}
+\newcommand{\Dz}{\mathcal{D}_z}
+\newcommand{\st}[1]{\textsc{#1}}
+\pagestyle{plain}
+
+\begin{document}
+\twocolumn[{%
+\begin{center}
+{\Large\bfseries Space-Filling Input Design for Nonlinear State-Space Identification:\\
+A Reproduction, and a Test of Whether Better Coverage Gives Better Models\par}
+\vspace{6pt}
+{\normalsize Ziad Aboelkhir}\\[1pt]
+{\footnotesize Systems and Control Engineering, King Fahd University of Petroleum \& Minerals,
+Dhahran, Saudi Arabia (ID g202622300). SCE~513 System Identification, Term~261, Prof.\ M.\ M.\ Al-Dhaifallah.}
+\end{center}
+\vspace{2pt}
+\noindent\rule{\textwidth}{0.4pt}\\[-2pt]
+\small\textbf{Abstract:}
+This report reproduces Secs.~4.4--4.6 of \citet{Kiss2024}, who optimise the phases of a multisine so that
+the input--state samples of a nonlinear mass--spring--damper fill a region of interest. An independent Python
+implementation with an exact adjoint gradient reproduces all seven targets: the initial cost
+(\nCinit{} vs.\ 287.15), the coverage figures, the Schroeder crest factor (\nCFschA{} vs.\ 1.87) and the
+Monte-Carlo trend. Our fully optimised cost is lower than published (median \mCfullMed{} vs.\ 3.88); stopping
+the same runs after 20 iterations gives a median of \nMCtMedian{}, equal to the paper's median, which supports
+an early-stopping explanation. As a bonus extension we ask whether the better coverage actually yields better
+identified models, and whether it still does when the design uses an identified model instead of the true one.
+Over \mNExt{} paired seeds and three noise levels, a radial-basis ridge model identified from the optimised input
+is \mFOfullforty{}$\times$ more accurate over the region of interest than one identified from a random-phase
+input, and a two-round design on identified models keeps a \mFOiterforty{}$\times$ gain.\\[2pt]
+\textit{Keywords:} input design, nonlinear system identification, space-filling, multisine, reproducibility,
+experiment design, state-space models.\\[-4pt]
+\noindent\rule{\textwidth}{0.4pt}\vspace{6pt}
+}]
+
+\section{Introduction}
+A nonlinear model is only reliable where the estimation data are \citep{Schoukens2019}. Standard excitations
+such as random-phase multisines keep a nonlinear system near its operating point, so large parts of the
+joint input--state space stay empty. \citet{Kiss2024} measure the emptiness with a smooth space-filling cost
+and minimise it over the phases of a multisine, with the amplitude spectrum (and hence the signal power)
+fixed. On a simulated nonlinear mass--spring--damper they report a 69-fold cost reduction
+(287.15$\to$3.88), better coverage than a Schroeder multisine, and the same trend over 20 random
+initialisations.
+
+\textbf{Reproduction question.} Can the cost reduction, the coverage plots, the crest factors and the
+Monte-Carlo statistics of Secs.~4.4--4.6 (targets T1--T7, approved in the M2 protocol) be recreated by an
+independent implementation from the information in the paper?
+
+\textbf{Extension question (bonus).} The paper argues that better coverage should give better models but
+does not identify a model. We test (Q1) whether a model identified from the optimised input is more accurate
+than one identified from random-phase or Schroeder inputs of identical spectrum, and (Q2) whether the
+benefit survives when the true system is unknown and the design must be computed on an identified surrogate.
+
+\section{Reference Method}
+\textbf{System.} A mass ($m=5$\,kg) on a rail is pulled by a spring ($s=800$\,N/m, natural length
+$l=0.17$\,m, anchored $a=0.25$\,m above the rail) and a damper ($c=10$\,Ns/m), Eq.~(9) of the paper:
+\begin{equation}
+\dot x_1=x_2,\quad \dot x_2=\tfrac{1}{m}\Big(u-sx_1+\tfrac{s\,l\,x_1}{\sqrt{x_1^2+a^2}}-cx_2\Big),
+\label{eq:sys}\end{equation}
+discretised by forward Euler, $x_{k+1}=x_k+T_sf(x_k,u_k)$, $T_s=0.01$\,s. The spring term makes the
+restoring force nonlinear in $x_1$. Eq.~(11) of the paper places $1/m$ in front of both derivatives; this is
+a notation error and Eq.~\eqref{eq:sys} is used, as agreed with the instructor.
+
+\textbf{Input.} One period ($N=2048$) of a multisine with 184 equal-amplitude lines ($l=21\ldots204$,
+1--10\,Hz), $u_k=\sum_l A\sin(2\pi lk/N+\varphi_l)$, scaled to a standard deviation of 160\,N. Only the
+phases $\theta=\varphi$ are designed.
+
+\textbf{Cost.} With $z_k=[u_k,x_{1,k},x_{2,k}]^\top$ from one steady-state period and a uniform grid
+$\{\tilde z_i\}_{i=1}^{n}$ ($20^3=8000$ points) on
+$\Dz=[-400,400]\,\mathrm{N}\times[-2,2]\,\mathrm{m}\times[-20,20]\,\mathrm{m/s}$,
+\begin{equation}
+d_i=\sum_{k=1}^{N}e^{-\frac12(\tilde z_i-z_k)^\top\Sigma^{-1}(\tilde z_i-z_k)},\quad
+C_\theta=\frac1n\sum_{i=1}^{n}\frac{1}{\epsilon+d_i},
+\label{eq:cost}\end{equation}
+$\Sigma=\mathrm{diag}(40^2,0.2^2,2^2)$. A grid point without nearby samples contributes up to
+$1/\epsilon$, so $C_\theta$ penalises empty regions. The authors minimise $C_\theta$ with MATLAB
+\texttt{fmincon} from random phases and compare with a Schroeder multisine \citep{Schroeder1970}.
+Assumptions: known, noiseless model; periodic steady state; fixed amplitude spectrum; local optimum only.
+
+\section{Reproduction Protocol}
+\textbf{Implementation.} All code is my own Python (NumPy, SciPy, Matplotlib); the authors released none.
+The gradient $\partial C_\theta/\partial\varphi$ is exact: Eq.~\eqref{eq:cost} is differentiated in closed
+form and the chain rule is run backwards through the Euler recursion (an adjoint, 0.3\,s per cost+gradient)
+and through the multisine. It matches central differences to $3.6\times10^{-10}$ of $\max|g|$. Phases are
+optimised with L-BFGS-B \citep{Byrd1995} (max.\ 1000 iterations, $f_{tol}=10^{-10}$, $g_{tol}=10^{-6}$).
+
+\begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{2.5pt}
+\caption{Result map: each published target, the script that regenerates it, the comparison metric and
+the final status.}\label{tab:map}
+\begin{tabular}{@{}llllc@{}}\toprule
+ID & Paper item & Script & Metric & Status\\\midrule
+T1 & Fig.~3 & \texttt{run\_sec44} & spectrum, CF & R\\
+T2 & Sec.~4.4 & \texttt{run\_sec44}, \texttt{run\_h1\_fmincon} & $C_{init},C_{opt}$, ratio & P\\
+T3 & Fig.~4 & \texttt{make\_figures} & $\kappa$, share in $\Dz$ & R\\
+T4 & Fig.~5 & \texttt{make\_figures} & visual, $\kappa$ & R\\
+T5 & Fig.~6 & \texttt{make\_figures} & samples per $u$-bin & R\\
+T6 & Sec.~4.5, Fig.~7 & \texttt{run\_sec45}, \texttt{m4\_analysis} & CF, $C_\theta$ & R/P\\
+T7 & Sec.~4.6, Fig.~8 & \texttt{run\_mc\_phases}, \texttt{m4\_analysis} & box-plot statistics & P\\
+\bottomrule\multicolumn{5}{@{}l}{\scriptsize R: reproduced, P: partially reproduced (see \S\ref{sec:h1}).}
+\end{tabular}\end{table}
+
+\begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{Settings. Top: given in the paper. Bottom: not reported, fixed in the M2 protocol before any result.}
+\label{tab:set}\begin{tabular}{@{}ll@{}}\toprule
+$m,s,a,l,c$ & 5\,kg, 800\,N/m, 0.25\,m, 0.17\,m, 10\,Ns/m\\
+$T_s$, $N$, lines & 0.01\,s, 2048, $l=21\ldots204$ (1.03--9.96\,Hz)\\
+$\Dz$, grid, $\Sigma$ & $\pm400$\,N$\times\pm2$\,m$\times\pm20$\,m/s, $20^3$, diag$(40^2,0.2^2,2^2)$\\\midrule
+$\epsilon$ & $10^{-3}$ (paper's 287.15 implies $\epsilon\le3.5\times10^{-3}$)\\
+Steady state & from rest, keep period $P=\nP$, tolerance $10^{-6}$\\
+Optimiser & L-BFGS-B, $\le$1000 it., $f_{tol}=10^{-10}$, $g_{tol}=10^{-6}$\\
+Seeds & 0 (T1--T6), 1--20 (T7), \texttt{numpy.default\_rng}\\
+Schroeder & $\varphi_l=-l(l-1)\pi/184$, $l=1\ldots184$\\
+\bottomrule\end{tabular}\end{table}
+
+\textbf{Settings not reported in the paper} (fixed in M2 before any result):
+$\epsilon=10^{-3}$ (the published 287.15 requires $\epsilon\le3.5\times10^{-3}$ since $C_\theta\le1/\epsilon$);
+start from rest and keep period $P=8$ (steady state checked by a period-to-period criterion $10^{-6}$);
+seeds 0 (T1--T6) and 1--20 (T7) with \texttt{numpy.default\_rng}; Schroeder phases
+$\varphi_l=-l(l-1)\pi/184$, $l=1\ldots184$.
+
+\textbf{Deviations.} (i) \texttt{fmincon}$\to$L-BFGS-B (both gradient-based local methods; tested in
+\S\ref{sec:h1}); (ii) PyTorch autograd$\to$hand-derived adjoint (PyTorch was not installable at M3);
+(iii) $P=5\to8$: the first seed-0 optimum violated the steady-state rule at $P=5$, so all runs were repeated.
+
+\textbf{Validation.} No model is fitted in Secs.~4.4--4.6, so there is no estimation/validation split.
+Instead: 20 independent seeds, re-evaluation on an independent $30^3$ grid
+(\nGridInit$\to$\nGridOpt, ratio \nGridRatio), a different initial state (state difference
+\nXzeroOpt) and $P=12$ (\nPtenOpt), plus eight unit checks D1--D8 (dimensions, free decay, steady state,
+kernel, cost bound, gradient, Euler stability, grid), all passed. The 20 Monte-Carlo optimisations were rerun for M4:
+the \mRerunIdentical{} runs on the M3 machine reproduced the M3 optima bit for bit; the runs on a second
+machine (Windows, other BLAS) agree to $\le$\mRerunItTwentyMax{} after 20 iterations, but round-off
+differences grow along the non-convex optimisation path and the converged costs differ by up to
+\mRerunFinalMax\,\% (median \mRerunFinalMed\,\%).
+
+\begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{Verification and validation checks (all pass).}\label{tab:diag}
+\begin{tabular}{@{}lll@{}}\toprule
+ID & Check & Result\\\midrule
+D1 & input dimension, mean, std, lines & std 160.000\,N, 184 lines\\
+D2 & free decay from $x_1=0.5$\,m & stable, damped\\
+D3 & steady state at $P=\nP$ & rel.\ change \nSSrelOpt\\
+D4/D5 & kernel $=1$ at $z_k=\tilde z_i$; $C\le1/\epsilon$ & exact\\
+D6 & adjoint vs.\ central differences & $\le3.6\times10^{-10}\max|g|$\\
+D7 & Euler spectral radius & 0.9925 / 0.9980 $<1$\\
+D8 & grid spacings & equal to paper\\
+V2 & independent $30^3$ grid & ratio \nGridRatio\\
+V3/V4 & other $x_0$; $P=12$ & \nXzeroOpt{} / \nPtenOpt\\
+V6 & rerun of 20 MC runs & same machine: identical\\
+\bottomrule\end{tabular}\end{table}
+
+\section{Reproduction Results}
+\begin{table}[t]\centering\footnotesize
+\caption{Published vs.\ reproduced values (seed 0 unless stated; MC = 20 seeds, median [min--max]).}
+\label{tab:comp}\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lll@{}}\toprule
+Quantity & Paper & Reproduced\\\midrule
+$C_\theta$ initial (seed 0) & 287.15 & \nCinit{} ($\nRelCinit\,\%$)\\
+$C_\theta$ initial, MC & $\approx$268 & \nMCiMedian{} [\nMCiMin--\nMCiMax]\\
+$C_\theta$ optimised, full run & 3.88 & \nCopt{} (\nNit{} it.)\\
+$C_\theta$ after 16 / 20 it. & 3.88 & \nEaC{} / \nEbC\\
+Ratio $C_{init}/C_{opt}$ & 69 (text), 74.0 & \nRatio{} (full); \nEbR{} (20 it.)\\
+MC final $C_\theta$, 20 it. & $\approx$3.65 [2.9--5.5] & \nMCtMedian{} [\nMCtMin--\nMCtMax]\\
+MC final $C_\theta$, full & -- & \mCfullMed{} [\mCfullMin--\mCfullMax]\\
+MC final $C_\theta$, BFGS-FD & -- & \mHoneMed{} [\mHoneMin--\mHoneMax]\\
+CF Schroeder & 1.87 & \nCFschA{} (+\nRelCFsch\,\%)\\
+CF optimised & 3.67 & \nCFopt{}; MC 20 it.: \mCFtwentyMed{} [\mCFtwentyMin--\mCFtwentyMax]\\
+Coverage $\kappa$ rand./Sch./opt. & -- & \nKapInit{} / \nKapSch{} / \nKapOpt{}\,\%\\
+\bottomrule\end{tabular}\end{table}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\columnwidth]{fig4_side_views.png}
+\caption{T3: input--state samples of the initial (blue), optimised (orange) and Schroeder (purple) signals,
+seed 0; boxes are the borders of $\Dz$. As in Fig.~4 of the paper, the optimised data spread towards the
+borders, mostly along $u$, while the Schroeder data stay inside $|u|\lesssim300$\,N.}
+\label{fig:side}\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\columnwidth]{fig3_signal.png}
+\caption{T1: initial (blue) and optimised (orange) multisine, seed 0, in time and frequency. The amplitude
+spectrum is identical (84.6\,dB on lines 21--204); only the waveform changes.}
+\label{fig:sig}\end{figure}
+
+\begin{figure*}[t]\centering
+\includegraphics[width=0.40\textwidth]{fig6_slices.png}\hfill
+\begin{minipage}[b]{0.57\textwidth}\centering
+\includegraphics[width=\textwidth]{fig7_schroeder.png}\\[4pt]
+\includegraphics[width=0.78\textwidth]{fig_cost_history.png}
+\end{minipage}
+\caption{Left, T5: eight $x_1$--$x_2$ slices along $u$ (paper Fig.~6), initial (blue) vs.\ optimised
+(orange), seed 0; the outer slices are almost empty for the random-phase input. Top right, T6: Schroeder
+multisine (paper Fig.~7). Bottom right: cost vs.\ evaluations for seed 0 (L-BFGS-B and the Adam cross-check);
+the paper's 3.88 is passed after \nFirstBelow{} iterations.}
+\label{fig:t56}\end{figure*}
+
+\textbf{T1, T3--T5 (signal and coverage).} The optimised signal keeps the amplitude spectrum to
+$\max_l|\Delta A_l|=\ndA$\,N, while the waveform changes (crest factor \nCFinit$\to$\nCFopt).
+The three qualitative findings of the paper's Figs.~4--6 are reproduced (Fig.~\ref{fig:side}): the
+random-phase data cluster in the centre, the optimised data fill the box, and the Schroeder data spread in
+$x_1,x_2$ but not along $u$. Quantitatively, the share of grid points with $d_i\ge1$ rises from
+\nKapInit\,\% to \nKapOpt\,\% and the two outer $u$-slices of Fig.~6 receive \nBinLoOpt{} and \nBinHiOpt{}
+samples instead of \nBinLoInit{} and \nBinHiInit.
+
+\textbf{T6 (Schroeder).} CF\,=\,\nCFschA{} vs.\ 1.87 (+\nRelCFsch\,\%); the index convention
+$l=21\ldots204$ gives \nCFschB. The cost ranking optimised\,<\,Schroeder (\nCsch)\,<\,random holds for
+every seed. The optimised CF depends on how far the optimisation goes: \mCFsixteenMed{} after 16 and
+\mCFtwentyMed{} after 20 iterations (medians over 20 seeds) vs.\ 3.67 published, and \mCFfullMed{} at the
+end, so the published value lies inside our early-stopped range [\mCFsixteenMin--\mCFsixteenMax].
+
+\subsection{T2 and T7: the optimised cost, and hypothesis H1}\label{sec:h1}
+The initial costs agree (seed 0: \nRelCinit\,\%; our 20-seed range contains 287.15), which confirms the
+grid, kernel and $\epsilon$. The optimised cost does not: L-BFGS-B passes 3.88 after a median of
+\mItPaperMed{} iterations and keeps going to \mCfullMed. \textbf{H1}: the authors stopped early. With
+default options, \texttt{fmincon} uses forward finite differences (185 evaluations per gradient) and
+\texttt{MaxFunctionEvaluations}\,=\,3000, i.e.\ about 16 gradients. M3 tested H1 only by stopping our
+L-BFGS-B early. For M4 we ran an \emph{fmincon-like} optimiser: dense BFGS with forward-difference
+gradients and a hard cap of 3000 cost evaluations, no exact gradient (seeds \mHoneSeeds; \mHoneTime\,min
+each). It ends at a median of \mHoneMed{} [IQR \mHoneQOne--\mHoneQThree, range \mHoneMin--\mHoneMax] versus
+the paper's $\approx$3.65 [2.9--5.5] (Fig.~\ref{fig:h1}). The fmincon-like runs overlap the published
+box but are more spread, while the 20-iteration L-BFGS-B runs (median \nMCtMedian) match the published
+median closely, and converged runs end about three times lower. A budget-limited quasi-Newton run
+therefore stops in the paper's cost range, and a converged one does not. H1 is well supported but not
+proven, because the authors' options and algorithm (interior-point) are unknown.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.94\columnwidth]{fig_h1.png}
+\caption{T7 and H1: final costs. Grey: paper Fig.~8 (read from the axes). Teal: fmincon-like BFGS with
+forward differences, 3000 evaluations. Blue/purple/orange: our L-BFGS-B runs (seeds 1--20) after 16 and 20
+iterations and at convergence. Dotted: published 3.88.}
+\label{fig:h1}\end{figure}
+
+\textbf{$\epsilon$ with re-optimisation.} Re-optimising seed 0 for $\epsilon\in\{10^{-4},10^{-3},
+3{\cdot}10^{-3},10^{-2}\}$ (300 iterations) changes the initial cost strongly
+(\mEpsAInit, \mEpsBInit, \mEpsCInit, \mEpsDInit) but the designed signal hardly: evaluated with the common
+$\epsilon=10^{-3}$, the optima cost \mEpsACref, \mEpsBCref, \mEpsCCref, \mEpsDCref{} and cover
+\mEpsAKap--\mEpsDKap\,\% of the grid. (Table~\ref{tab:eps}). Only $\epsilon\approx10^{-3}$ reproduces the published initial cost,
+so $\epsilon$ explains the absolute values but not the gap in $C_{opt}$.
+
+\begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{$\epsilon$ sensitivity with re-optimisation (seed 0, 300 iterations). $C^{(10^{-3})}_{opt}$: optimum
+evaluated with the common $\epsilon=10^{-3}$.}\label{tab:eps}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+$\epsilon$ & $C_{init}$ & $C_{opt}$ & ratio & $C^{(10^{-3})}_{opt}$ & $\kappa$ [\%]\\\midrule
+$10^{-4}$ & \mEpsAInit & \mEpsAOpt & \mEpsARatio & \mEpsACref & \mEpsAKap\\
+$10^{-3}$ & \mEpsBInit & \mEpsBOpt & \mEpsBRatio & \mEpsBCref & \mEpsBKap\\
+$3\cdot10^{-3}$ & \mEpsCInit & \mEpsCOpt & \mEpsCRatio & \mEpsCCref & \mEpsCKap\\
+$10^{-2}$ & \mEpsDInit & \mEpsDOpt & \mEpsDRatio & \mEpsDCref & \mEpsDKap\\
+\bottomrule\end{tabular}\end{table}
+
+\textbf{Reproduction status.} T1, T3, T4, T5: reproduced. T6: Schroeder CF reproduced (0.5\,\%), optimised
+CF partially (depends on the stopping point). T2, T7: \emph{partially reproduced}: the initial costs, the
+ranking and the early-stopped values match; the converged values are lower, explained by H1. The paper's
+``69$\times$'' is inconsistent with its own numbers ($287.15/3.88=74.0$).
+
+\section{Extension: From Coverage to Model Accuracy}
+\input{ext_section.tex}
+
+\section{Discussion and Limitations}
+\input{discussion.tex}
+
+\section{Conclusion}
+\input{conclusion.tex}
+
+{\footnotesize
+\bibliographystyle{plainnat}
+\setlength{\bibsep}{1pt}
+\bibliography{refs}}
+
+{\footnotesize\textbf{Reproducibility.} Code, data-generation scripts, seeds, versions and every figure/number
+in this report: package \texttt{SCE513\_Project\_g202622300} (\texttt{README.md}; \texttt{make all}).
+Software: Python 3.13, NumPy \citep{Harris2020}, SciPy \citep{Virtanen2020}, Numba \citep{Lam2015},
+Matplotlib \citep{Hunter2007}. Paper figures are not redistributed.
+
+\textbf{Authorship and AI-use statement.} This is my individual work. I selected the paper, set the
+protocol (M2) and every setting, ran all experiments, checked every result against the paper and can explain
+all code and results. Claude (Anthropic) was used, as allowed by the course rules, to draft and debug the
+Python code from my protocol, to propose the extension design that I then fixed, and to draft and format this
+report. I verified the derivations (adjoint gradient, ridge LS), the unit tests (gradient checks against
+finite differences) and every number, which is generated automatically from the result files.\par}
+\end{document}

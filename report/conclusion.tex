@@ -1,0 +1,12 @@
+\textbf{Reproduction.} Secs.~4.4--4.6 of \citet{Kiss2024} are reproduced by an independent Python
+implementation: coverage plots, initial costs, Schroeder crest factor and Monte-Carlo trend agree
+(T1, T3--T6 reproduced). The converged optimised cost is lower than published (\mCfullMed{} vs.\ 3.88);
+budget-limited optimisers land in the paper's range, so T2 and T7 are partially reproduced, with early
+stopping (H1) as the well-supported explanation. The stated 69$\times$ should read 74$\times$.
+
+\textbf{Extension.} Better coverage does give better models: with the same input spectrum, the model
+identified from the space-filling input is \mFOfullforty$\times$ more accurate over the region of
+interest (40\,dB) and much more robust to larger inputs, at a small cost for test signals of the
+random-phase kind. The benefit survives when the true system is unknown and the design is computed on an
+identified model (\mFOsurforty$\times$, \mFOiterforty$\times$ with one re-identification round), and the
+space-filling cost ranks designs by model error ($\rho=\mRhoforty$).

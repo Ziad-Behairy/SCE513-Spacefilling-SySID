@@ -24,9 +24,11 @@ JOBS = ([[PY, "run_mc_phases.py", str(s), str(s)] for s in range(1, 21)]        
 def done(job):
     R = os.path.join(HERE, "..", "results")
     name = job[1] if job[1] != "-m" else job[2]
-    s = job[-1]
-    f = {"run_mc_phases.py": f"mc_phases/seed_{int(s):02d}.json", "run_h1_fmincon.py": f"h1_fmincon/seed_{int(s):02d}.json",
-         "run_eps_reopt.py": "eps_reopt.json", "ext.run_extension": f"ext/seed_{int(s):02d}.json"}[name]
+    if name == "run_eps_reopt.py":
+        return os.path.exists(os.path.join(R, "eps_reopt.json"))
+    s = int(job[-1])
+    f = {"run_mc_phases.py": f"mc_phases/seed_{s:02d}.json", "run_h1_fmincon.py": f"h1_fmincon/seed_{s:02d}.json",
+         "ext.run_extension": f"ext/seed_{s:02d}.json"}[name]
     return os.path.exists(os.path.join(R, f))
 
 

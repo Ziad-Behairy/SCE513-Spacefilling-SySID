@@ -52,8 +52,11 @@ by the report). Long steps are restart-safe (finished seeds are skipped) and can
 
 ## 3. Seeds and determinism
 All randomness uses `numpy.random.default_rng` with fixed seeds (table in `data_instructions.md`).
-The M4 rerun of the 20 Monte-Carlo optimisations reproduces the M3 optima exactly (relative difference
-reported as `\mRerunDiff` in the report).
+On the same machine every run is bit-for-bit identical (the M4 rerun of seeds 1-4 and 11-15 reproduced
+the M3 optima exactly). Seeds 5-10 and 16-20 were rerun on a Windows laptop: the costs agree to about 1e-6
+after 20 iterations, but round-off differences grow along the non-convex optimisation path, so the
+converged costs differ by a few percent (reported in the report, Sec. 3). Use the stored
+`results/mc_phases/*.json` to reproduce the exact figures.
 
 ## 4. Code map
 

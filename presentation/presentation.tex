@@ -1,0 +1,147 @@
+% M5 seminar deck (10 min + 5 min questions). Numbers are macros from ../results/numbers*.tex
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme[progressbar=frametitle,numbering=fraction]{metropolis}
+\usepackage{booktabs,amsmath}
+\graphicspath{{../results/}}
+\input{../results/numbers.tex}
+\input{../results/numbers_m4.tex}
+\title{Space-Filling Input Design for Nonlinear State-Space Identification}
+\subtitle{Reproduction of Kiss, T\'oth \& Schoukens (SYSID 2024) --- and does better coverage give better models?}
+\author{Ziad Aboelkhir \quad (g202622300)}
+\institute{SCE 513 System Identification, KFUPM, Term 261 --- Prof.\ M.\ M.\ Al-Dhaifallah}
+\date{M5 seminar}
+\begin{document}
+\maketitle
+
+\begin{frame}{The problem and the paper's claim}
+\begin{columns}[T]\begin{column}{0.55\textwidth}
+\begin{itemize}
+\item A nonlinear model is only reliable \alert{where the data are}.
+\item Random-phase multisines keep the system near its operating point.
+\item \textbf{Paper:} keep the amplitude spectrum, optimise only the 184 phases so that the samples
+$z_k=[u_k,x_{1,k},x_{2,k}]$ fill a box $\mathcal D_z$.
+\item \textbf{Claim:} cost $287.15\to3.88$ (``69$\times$''), better than Schroeder, robust over 20 starts.
+\end{itemize}
+\end{column}\begin{column}{0.42\textwidth}
+\small Space-filling cost (Eq.~8):
+\[ d_i=\sum_k e^{-\frac12\|\tilde z_i-z_k\|^2_{\Sigma^{-1}}},\qquad
+C_\theta=\frac1n\sum_{i=1}^{8000}\frac{1}{\epsilon+d_i}\]
+Empty grid point $\Rightarrow$ contributes $1/\epsilon$.
+\end{column}\end{columns}
+\end{frame}
+
+\begin{frame}{My implementation (own Python, no author code)}
+\centering
+\small phases $\varphi$ $\to$ multisine $u$ $\to$ Euler simulation, 8 periods $\to$ last period $Z$ $\to$ $C_\theta$\\[4pt]
+\alert{exact gradient}: closed form $\partial C/\partial Z$ + adjoint backwards through the Euler recursion + $\partial u/\partial\varphi$\\[4pt]
+L-BFGS-B, seeds 0 and 1--20, $\epsilon=10^{-3}$ (not given in paper)\\[8pt]
+\begin{tabular}{ll}\toprule
+Check & Result\\\midrule
+Gradient vs.\ finite differences & error $\le 3.6\times10^{-10}\max|g|$\\
+Steady state ($P=\nP$) & period change \nSSrelOpt\\
+Independent $30^3$ grid & ratio \nGridRatio\\
+Rerun of 20 MC runs & same machine identical; other OS $\le$\mRerunFinalMax\,\%\\
+\bottomrule\end{tabular}
+\end{frame}
+
+\begin{frame}{Coverage is reproduced (T1, T3--T5)}
+\begin{columns}\begin{column}{0.5\textwidth}
+\includegraphics[width=\textwidth]{fig4_side_views.png}
+\end{column}\begin{column}{0.48\textwidth}
+\begin{itemize}
+\item Random: clustered in the centre
+\item Optimised: fills the box, mostly along $u$
+\item Schroeder: spreads $x_1,x_2$, not $u$
+\item Grid points covered: \nKapInit\,\% $\to$ \nKapOpt\,\%
+\item Spectrum unchanged: $\max|\Delta A_l|=\ndA$\,N
+\end{itemize}
+\end{column}\end{columns}
+\end{frame}
+
+\begin{frame}{Numbers: published vs.\ reproduced}
+\centering\small
+\begin{tabular}{lll}\toprule
+Quantity & Paper & Mine\\\midrule
+Initial cost, seed 0 & 287.15 & \nCinit{} (20 seeds: \nMCiMin--\nMCiMax)\\
+Optimised cost, converged & 3.88 & \nCopt{}\\
+Optimised cost, 20 iterations & 3.88 & \nEbC{}\\
+MC median after 20 it. & $\approx$3.65 & \nMCtMedian\\
+Crest factor Schroeder & 1.87 & \nCFschA\\
+Crest factor optimised & 3.67 & \mCFsixteenMed{} (16 it.), \mCFfullMed{} (converged)\\
+\bottomrule\end{tabular}\\[6pt]
+Status: T1, T3--T5 reproduced; T6 Schroeder reproduced; T2, T7 \alert{partially} (converged cost lower).
+\end{frame}
+
+\begin{frame}{The discrepancy: H1 = the authors stopped early}
+\begin{columns}\begin{column}{0.5\textwidth}
+\includegraphics[width=\textwidth]{fig_h1.png}
+\end{column}\begin{column}{0.48\textwidth}
+\begin{itemize}
+\item fmincon defaults: finite-difference gradient (185 evals) and 3000 evals $\Rightarrow\approx16$ gradients
+\item fmincon-like BFGS-FD, 3000 evals: median \mHoneMed{} (\mHoneMin--\mHoneMax)
+\item L-BFGS-B after 20 it.: median \nMCtMedian{} = paper
+\item Converged: \mCfullMed{} --- far lower
+\end{itemize}
+\end{column}\end{columns}
+\end{frame}
+
+\begin{frame}{Extension: does better coverage give a better model?}
+\begin{itemize}
+\item \textbf{Q1} Same spectrum, energy, length --- is the identified model more accurate?
+\item \textbf{Q2} True system unknown: design on a model \alert{identified} from a first random-phase experiment
+(surrogate), optionally re-identify and redesign (iterative).
+\end{itemize}
+\small
+\begin{tabular}{ll}\toprule
+Model & known kinematics + black-box force law $g=\theta^\top\phi(z)$, 343 Gaussian RBFs\\
+Estimator & ridge LS, $\lambda$ by blocked CV on training data only\\
+Noise & absolute sensor noise on $x$: clean, 40 dB, 30 dB; same sequence for all designs\\
+Test & 20\,000 uniform points in $\mathcal D_z$; free-run on new multisines (160, 240 N)\\
+Stats & 20 paired seeds, one-sided Wilcoxon vs.\ random\\
+\bottomrule\end{tabular}
+\end{frame}
+
+\begin{frame}{Result: \mFOfullforty$\times$ more accurate over the region of interest}
+\centering\includegraphics[width=0.95\textwidth]{fig_ext_accuracy.png}\\
+\small Surrogate design keeps \mFOsurforty$\times$, iterative \mFOiterforty$\times$ (40 dB);
+space-filling cost predicts model error (Spearman $\rho=\mRhoforty$).
+\end{frame}
+
+\begin{frame}{Why --- and the price}
+\centering\includegraphics[width=0.95\textwidth]{fig_ext_mechanism.png}\\
+\small Error falls with local data density; optimised inputs leave no empty regions.
+Price: on random-phase test signals at the design level the random model is as good (\mXRfortyesimonesixty\,\% vs.\
+\mXOfullfortyesimonesixty\,\%); at 1.5$\times$ amplitude it fails (\mXRfortyesimtwoforty\,\% vs.\ \mXOfullfortyesimtwoforty\,\%).
+\end{frame}
+
+\begin{frame}{Limitations}
+\begin{itemize}
+\item H1 supported, not proven: authors' optimiser options unknown.
+\item $\epsilon$, steady-state rule, Schroeder index: my choices (fixed before results, M2).
+\item Extension: one system, one model class, simulated sensor noise; noisy regressors give
+errors-in-variables bias (same for all designs).
+\item Surrogate design: 20 iterations; 100 iterations on a fixed surrogate helped little --- re-identify instead.
+\item Converged optima differ across machines (round-off grows along the path): compare statistics, not single runs.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion}
+\begin{itemize}
+\item The paper's method works: all qualitative findings and the early-stopped numbers are reproduced;
+the converged optimum is even better than published.
+\item The ``69$\times$'' is inconsistent with the paper's own numbers (74.0$\times$).
+\item \textbf{New:} the coverage gain becomes a model-accuracy gain (\mFOfullforty$\times$), and it survives
+designing on an identified model --- the realistic case.
+\end{itemize}
+\end{frame}
+
+\appendix
+\begin{frame}[fragile]{Backup: regenerate a figure live}
+\begin{verbatim}
+cd code
+python make_figures.py      # Figs. T1-T7 from results/*.json
+python m4_analysis.py       # H1 + extension figures, numbers_m4.tex
+cd ../tests && pytest -q    # 10 checks incl. gradient vs finite differences
+\end{verbatim}
+\end{frame}
+\end{document}

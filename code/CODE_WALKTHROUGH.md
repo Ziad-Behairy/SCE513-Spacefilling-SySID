@@ -145,7 +145,10 @@ Same optimizer, settings and seeds (1–20) as `run_sec46.py`, but it **stores t
 16 iterations (`phi_16`), after 20 iterations (`phi_20`) and at the end (`phi`). M3 stored only the
 costs; the extension needs the actual signals. The SciPy callback receives the current point after
 every iteration (`intermediate_result.x`), so we copy it at iterations 16 and 20.
-Check: the final costs equal the M3 ones exactly (same seed → same numbers), reported as `\mRerunDiff`.
+Check: on the same machine the final costs equal the M3 ones exactly (same seed → same numbers).
+On another OS/BLAS (my Windows laptop) the first 20 iterations agree to ~1e-6, but tiny round-off
+differences (1e-15) grow over 1000 iterations of a non-convex optimisation, so the end points differ by a
+few percent. This is normal for long nonlinear optimisations and is reported honestly in the report.
 
 ## `run_h1_fmincon.py` — a closer test of hypothesis H1
 Question: does an optimizer that behaves like MATLAB `fmincon` with default options stop near 3.88?

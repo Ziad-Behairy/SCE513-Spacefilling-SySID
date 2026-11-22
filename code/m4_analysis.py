@@ -50,9 +50,18 @@ def repro():
     mac("NMC", str(len(runs)))
     # determinism: the rerun must give the same optimum as the M3 run (same seed, same settings)
     old = {r["seed"]: r for r in loadfolder("mc")}
-    diffs = [abs(r["C_opt"] - old[r["seed"]]["C_opt"]) / old[r["seed"]]["C_opt"] for r in runs if r["seed"] in old]
-    out["rerun_max_rel_diff"] = float(max(diffs)) if diffs else None
-    mac("RerunDiff", out["rerun_max_rel_diff"] or 0.0, "{:.1e}")
+    # Seeds 1-4 and 11-15 were rerun on the same Linux machine as M3; seeds 5-10 and 16-20 on a
+    # Windows laptop (different BLAS/compiler).  Compare final costs and the cost after 20 iterations.
+    pairs = [(np.array(r["history"]), np.array(old[r["seed"]]["history"])) for r in runs if r["seed"] in old]
+    fin = np.array([abs(a[-1] - b[-1]) / b[-1] for a, b in pairs])
+    it20 = np.array([abs(a[20] - b[20]) / b[20] for a, b in pairs])
+    out["rerun"] = {"n_identical": int(np.sum(fin == 0)), "final_max": float(fin.max()),
+                    "final_median_nonzero": float(np.median(fin[fin > 0])) if np.any(fin > 0) else 0.0,
+                    "it20_max": float(it20.max())}
+    mac("RerunIdentical", str(out["rerun"]["n_identical"]))
+    mac("RerunFinalMax", 100 * out["rerun"]["final_max"], "{:.1f}")
+    mac("RerunFinalMed", 100 * out["rerun"]["final_median_nonzero"], "{:.1f}")
+    mac("RerunItTwentyMax", out["rerun"]["it20_max"], "{:.0e}")
     rows = {"16": [], "20": [], "full": [], "init": []}
     for r in runs:
         for key, ph in [("init", "phi0"), ("16", "phi_16"), ("20", "phi_20"), ("full", "phi")]:
@@ -175,8 +184,8 @@ def extension():
                         pv = np.nan
                     pv2 = stats.wilcoxon(a[ok], b[ok], alternative="greater").pvalue if ok.sum() > 5 else np.nan
                     row[f"p_{m}"] = pv; row[f"pworse_{m}"] = pv2
-                    mac(f"P{d}_{lk}_{m}", "<0.001" if pv < 1e-3 else f"{pv:.3f}")
-                    mac(f"Pw{d}_{lk}_{m}", "<0.001" if pv2 < 1e-3 else f"{pv2:.3f}")
+                    mac(f"P{d}_{lk}_{m}", "$<0.001$" if pv < 1e-3 else f"$={pv:.3f}$")
+                    mac(f"Pw{d}_{lk}_{m}", "$<0.001$" if pv2 < 1e-3 else f"$={pv2:.3f}$")
                     mac(f"Win{d}_{lk}_{m}", str(int(np.sum(a[ok] < b[ok]))))
             table.append(row)
     # improvement factors (median of paired ratios R / design)
@@ -243,14 +252,15 @@ def extension():
     ax[0].set_xticks(range(len(LEV)), [l for _, l in LEV])
     ax[0].set_yscale("log")
     ax[0].set_ylabel(r"one-step NRMSE of $\hat g$ on $\mathcal{D}_z$ [%]")
-    ax[0].legend(ncol=3, fontsize=6.5, frameon=False, loc="upper left")
+    ax[0].legend(ncol=6, fontsize=6.5, frameon=False, loc="lower left", bbox_to_anchor=(0.0, 1.0),
+                 handletextpad=0.3, columnspacing=0.9)
     ax[0].grid(alpha=0.3, axis="y")
     lk = "40"
     for d in DES:
         c = [r["levels"][lk][d]["C_true"] for r in runs if d in r["levels"][lk]]
         e = [r["levels"][lk][d]["e_uni"] * 100 for r in runs if d in r["levels"][lk]]
         ax[1].loglog(c, e, "o", ms=2.5, color=COL[d], alpha=0.8)
-    ax[1].set_xlabel(r"space-filling cost $C_\theta$ (true system)")
+    ax[1].set_xlabel(r"cost $C_\theta$ on the true system")
     ax[1].set_ylabel("NRMSE [%] (40 dB)")
     ax[1].set_title(fr"Spearman $\rho$ = {out['spearman_40'][0]:.2f}", fontsize=8)
     ax[1].grid(alpha=0.3, which="both")
@@ -284,7 +294,7 @@ def extension():
                           whiskerprops=dict(color=COL[d]), capprops=dict(color=COL[d]), flierprops=dict(markeredgecolor=COL[d], ms=2))
     for d in show2:
         ax[1].plot([], [], "s", color=COL[d], label=LAB[d])
-    ax[1].legend(ncol=2, fontsize=6, frameon=False, loc="upper left")
+    ax[1].legend(ncol=3, fontsize=6, frameon=False, loc="upper left", handletextpad=0.3, columnspacing=0.8)
     ax[1].set_xticks([0, 1], ["test std 160 N\n(design level)", "test std 240 N\n(stress test)"])
     ax[1].set_yscale("log")
     ax[1].set_ylabel("free-run NRMSE [%] (40 dB)")
