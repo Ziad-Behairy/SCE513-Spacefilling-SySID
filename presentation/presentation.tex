@@ -13,6 +13,11 @@
 \begin{document}
 \maketitle
 
+\begin{frame}{The test system (paper Sec.~4.1)}
+\centering\includegraphics[width=0.82\textwidth]{fig_system_3d.png}\\
+\small $\dot x_1=x_2,\quad \dot x_2=\frac1m\big(u-sx_1+\frac{s\,l\,x_1}{\sqrt{x_1^2+a^2}}-cx_2\big)$, forward Euler, $T_s=0.01$\,s
+\end{frame}
+
 \begin{frame}{The problem and the paper's claim}
 \begin{columns}[T]\begin{column}{0.55\textwidth}
 \begin{itemize}
@@ -56,6 +61,10 @@ Rerun of 20 MC runs & same machine identical; other OS $\le$\mRerunFinalMax\,\%\
 \item Spectrum unchanged: $\max|\Delta A_l|=\ndA$\,N
 \end{itemize}
 \end{column}\end{columns}
+\end{frame}
+
+\begin{frame}{T4 in 3-D: where the samples are}
+\centering\includegraphics[width=0.95\textwidth]{fig_states_3d.png}
 \end{frame}
 
 \begin{frame}{Numbers: published vs.\ reproduced}

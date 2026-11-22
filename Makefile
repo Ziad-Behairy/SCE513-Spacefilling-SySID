@@ -19,8 +19,9 @@ extension:       ## bonus extension (needs results/mc_phases), ~1 h on 2 cores
 	cd code && $(PY) -m ext.run_extension 1 20
 	cd code && $(PY) -m ext.run_fixed_lambda
 
-analysis:        ## M4 figures, tables and results/numbers_m4.tex
+analysis:        ## M4 figures, tables, results/numbers_m4.tex and 3-D drawings
 	cd code && $(PY) m4_analysis.py
+	-cd code && $(PY) make_illustrations.py
 
 report: analysis ## LaTeX -> report/report.pdf
 	cd report && pdflatex -interaction=nonstopmode report.tex >/dev/null; bibtex report >/dev/null; \

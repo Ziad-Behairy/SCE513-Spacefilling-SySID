@@ -225,3 +225,14 @@ Numba compiles these loops (speed only). Checked against finite differences in `
   (Söderström 2007). Same bias for all designs, but larger at 30 dB. Instrumental variables would be the fix.
 * **Why does designing on a wrong model still help?** The surrogate is accurate near the data it was
   trained on and linear outside; pushing samples outward on it still pushes them outward on the true system.
+
+## `run_all.py` — the one main script
+Runs the numbered workflow in order: M3 core (`main.py`), M4 + extension runs on many cores
+(`run_parallel.py`), the fixed-λ robustness check, `m4_analysis.py`, the drawings, and the LaTeX build.
+`--analysis` redoes only the cheap last steps from the stored results.
+
+## `make_illustrations.py` — drawings only (no results)
+* `fig_system_3d.png`: the test system rendered in 3-D with PyVista (VTK). Real `a` and `l`, the spring is a
+  tube along a helix from the anchor to the cart. Labels are placed by projecting 3-D points to pixels
+  (`WorldToDisplay`), then drawn with Matplotlib.
+* `fig_states_3d.png`: the 2048 samples `z_k = [u, x1, x2]` of seed 0 (initial vs optimised) inside the box D_z.

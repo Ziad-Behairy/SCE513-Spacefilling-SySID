@@ -11,7 +11,7 @@
 \usepackage[font=footnotesize,labelfont=bf,labelsep=period]{caption}
 \usepackage{titlesec}
 \usepackage[hidelinks]{hyperref}
-\usepackage{microtype}\usepackage[section]{placeins}\usepackage{dblfloatfix}\usepackage{tikz}\usetikzlibrary{arrows.meta,positioning}
+\usepackage{microtype}\usepackage{placeins}\usepackage{dblfloatfix}\usepackage{tikz}\usetikzlibrary{arrows.meta,positioning}
 \titleformat{\section}{\normalfont\normalsize\bfseries\centering}{\thesection.}{0.5em}{\MakeUppercase}
 \titleformat{\subsection}{\normalfont\normalsize\itshape}{\thesubsection}{0.5em}{}
 \titlespacing*{\section}{0pt}{8pt}{4pt}
@@ -106,9 +106,36 @@ $\Sigma=\mathrm{diag}(40^2,0.2^2,2^2)$. A grid point without nearby samples cont
 $1/\epsilon$, so $C_\theta$ penalises empty regions. The authors minimise $C_\theta$ with MATLAB
 \texttt{fmincon} from random phases and compare with a Schroeder multisine \citep{Schroeder1970}.
 Assumptions: known, noiseless model; periodic steady state; fixed amplitude spectrum; local optimum only.
+\emph{Validation in the paper}: no model is fitted; the designed input is judged by its cost, by coverage
+plots against a random-phase and a Schroeder multisine, and by 20 Monte-Carlo restarts (Secs.~4.4--4.6).
+
+\begin{figure*}[t]\centering
+\begin{minipage}[c]{0.52\textwidth}\centering
+\includegraphics[width=\textwidth]{fig_system_3d.png}\\[-1pt]{\small (a)}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.45\textwidth}\centering\footnotesize
+\begin{tikzpicture}[node distance=4.5mm and 3mm,>=Stealth,
+  b/.style={draw,rounded corners=2pt,align=center,inner sep=2.5pt,minimum height=8mm,text width=23mm,fill=#1!10},
+  b/.default=gray]
+\node[b=orange] (ph) {phases $\varphi$\\184 parameters};
+\node[b=blue,right=of ph] (u) {multisine $u(\varphi)$\\Eq.~(12), std 160\,N};
+\node[b=gray,below=of u] (sim) {Euler simulation\\$P=8$, Eq.~(10)};
+\node[b=gray,left=of sim] (z) {last period\\$Z\in\mathbb R^{2048\times3}$};
+\node[b=teal,below=of z] (c) {cost $C_\theta$, Eq.~(8)\\$20^3$ grid, $\epsilon$};
+\node[b=red,right=of c] (g) {adjoint gradient\\$\partial C_\theta/\partial\varphi$};
+\draw[->] (ph)--(u); \draw[->] (u)--(sim); \draw[->] (sim)--(z); \draw[->] (z)--(c); \draw[->] (c)--(g);
+\draw[->,thick] (g.east) -- ++(3mm,0) |- ([yshift=3mm]u.north) -| node[pos=0.25,above]{L-BFGS-B update} (ph.north);
+\end{tikzpicture}\\[1pt]{\small (b)}
+\end{minipage}
+\caption{(a) Test system of Sec.~4.1 of the paper, drawn to scale for $a$ and $l$ (own 3-D rendering): the
+spring is anchored a height $a$ above the cart, so its horizontal restoring force
+$s\,x_1(1-l/\sqrt{x_1^2+a^2})$ is nonlinear in $x_1$. (b) The reproduced optimisation loop: only the phases
+change, the amplitude spectrum and the signal power stay fixed.}
+\label{fig:sys}\end{figure*}
 
 \section{Reproduction Protocol}
-\textbf{Implementation.} All code is my own Python (NumPy, SciPy, Matplotlib); the authors released none.
+\textbf{Implementation.} All code is my own Python 3.13 (NumPy 2.5.3, SciPy 1.18.1, Matplotlib 3.11.2;
+Numba 0.68.1 for the extension); the authors released none. CPU only, float64.
 The gradient $\partial C_\theta/\partial\varphi$ is exact: Eq.~\eqref{eq:cost} is differentiated in closed
 form and the chain rule is run backwards through the Euler recursion (an adjoint, \mEvalTime\,s per cost+gradient)
 and through the multisine. It matches central differences to \mGradErr{} of $\max|g|$. Phases are
@@ -126,7 +153,7 @@ T4 & Fig.~5 & 3-D view, $\kappa$ (\texttt{sec44}) & R\\
 T5 & Fig.~6 & samples per $u$-bin (\texttt{sec44}) & R\\
 T6 & Sec.~4.5, Fig.~7 & CF, $C_\theta$ (\texttt{sec45}) & R/P\\
 T7 & Sec.~4.6, Fig.~8 & box-plot statistics (\texttt{mc\_phases}) & P\\
-\bottomrule\multicolumn{4}{@{}l}{\scriptsize R: reproduced, P: partially (\S\ref{sec:h1}). T4 figure: \texttt{results/fig5\_3d.png}.}
+\bottomrule\multicolumn{4}{@{}l}{\scriptsize R: reproduced, P: partially (\S\ref{sec:h1}). T4: Fig.~\ref{fig:3d}.}
 \end{tabular}\end{table}
 
 \begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{3pt}
@@ -152,7 +179,7 @@ $\varphi_l=-l(l-1)\pi/184$, $l=1\ldots184$.
 \S\ref{sec:h1}); (ii) PyTorch autograd$\to$hand-derived adjoint (PyTorch was not installable at M3);
 (iii) $P=5\to8$: the first seed-0 optimum violated the steady-state rule at $P=5$, so all runs were repeated.
 
-\textbf{Validation.} No model is fitted in Secs.~4.4--4.6, so there is no estimation/validation split.
+\textbf{Data split and validation.} No model is fitted in Secs.~4.4--4.6, so there is no estimation/validation split.
 Instead: 20 independent seeds, re-evaluation on an independent $30^3$ grid
 (\nGridInit$\to$\nGridOpt, ratio \nGridRatio), a different initial state (state difference
 \nXzeroOpt) and $P=12$ (\nPtenOpt), plus eight unit checks D1--D8 (dimensions, free decay, steady state,
@@ -225,6 +252,13 @@ multisine (paper Fig.~7). Bottom right: cost vs.\ evaluations for seed 0 (L-BFGS
 the paper's 3.88 is passed after \nFirstBelow{} L-BFGS-B iterations (about 20 evaluations).}
 \label{fig:t56}\end{figure*}
 
+\begin{figure}[t]\centering
+\includegraphics[width=\columnwidth]{fig_states_3d.png}
+\caption{T4: 3-D view of the 2048 input--state samples of seed 0 inside $\Dz$ (black box), paper Fig.~5.
+The random-phase samples form a cloud in the centre; the optimised samples reach the faces and corners of the
+box, with a dense core remaining.}
+\label{fig:3d}\end{figure}
+
 \textbf{T1, T3--T5 (signal and coverage).} The optimised signal keeps the amplitude spectrum to
 $\max_l|\Delta A_l|=\ndA$\,N, while the waveform changes (crest factor \nCFinit$\to$\nCFopt).
 The three qualitative findings of the paper's Figs.~4--6 are reproduced (Fig.~\ref{fig:side}): the
@@ -290,6 +324,7 @@ ranking and the early-stopped values match; the converged values are lower, cons
 \section{Extension: From Coverage to Model Accuracy}
 \input{ext_section.tex}
 
+\FloatBarrier
 \section{Discussion and Limitations}
 \input{discussion.tex}
 
@@ -302,14 +337,17 @@ ranking and the early-stopped values match; the converged values are lower, cons
 \bibliography{refs}}
 
 {\footnotesize\textbf{Reproducibility.} Code, data-generation scripts, seeds, versions and every figure/number
-in this report: package \texttt{SCE513\_Project\_g202622300} (\texttt{README.md}; \texttt{make all}).
-Software: Python 3.13, NumPy \citep{Harris2020}, SciPy \citep{Virtanen2020}, Numba \citep{Lam2015},
-Matplotlib \citep{Hunter2007}. Paper figures are not redistributed.
+in this report: \texttt{M4\_g202622300\_Reproducibility\_Package.zip} (\texttt{README.md}; one main script
+\texttt{python code/run\_all.py}). Software: Python 3.13, NumPy \citep{Harris2020}, SciPy \citep{Virtanen2020},
+Numba \citep{Lam2015}, Matplotlib \citep{Hunter2007}, PyVista \citep{Sullivan2019} (Fig.~\ref{fig:sys}a only).
+No data, code or figures of the authors are used or redistributed; all data are simulated.
 
 \textbf{Authorship and AI-use statement.} This is my individual work. I selected the paper, set the
 protocol (M2) and every setting, ran all experiments, checked every result against the paper and can explain
 all code and results. Claude (Anthropic) was used, as allowed by the course rules, to draft and debug the
-Python code from my protocol, to propose the extension design that I then fixed, and to draft and format this
-report. I verified the derivations (adjoint gradient, ridge LS), the unit tests (gradient checks against
-finite differences) and every number, which is generated automatically from the result files.\par}
+Python code from my protocol, to propose the extension design that I then fixed, to draft and format this
+report and the figures, and, as a separate Claude instance that had not written the work, to review it
+(recomputing numbers from the result files and checking the literature). I verified the derivations (adjoint
+gradient, ridge LS), the unit tests (gradient checks against finite differences), the related-work citations,
+and every number, which is generated automatically from the result files.\par}
 \end{document}
