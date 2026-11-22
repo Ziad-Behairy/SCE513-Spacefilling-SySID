@@ -9,18 +9,21 @@ influential ones ($\epsilon$, optimiser, budget, grid, initial state). (ii) H1 i
 independent budget-limited optimisers, but \texttt{fmincon}'s interior-point steps were not reproduced
 exactly; without MATLAB it remains a hypothesis. (iii) The Fig.~8 values of the paper were read from the
 axes. (iv) The extension uses one system, one model class and simulated white sensor noise. With noisy
-states in the regressors, least squares is biased (errors-in-variables, \citealp{Soderstrom2007}); the
-bias affects all designs equally but grows at 30\,dB, where an instrumental-variable estimator would be
-the natural next step. (v) The surrogate design used short runs (20 iterations); longer runs on a fixed
+states in the regressors, least squares is biased (errors-in-variables, \citealp{Soderstrom2007}), and the
+target $(x_{2,k+1}-x_{2,k})/T_s$ amplifies the noise by $\sqrt2/T_s$. Because the sensor noise has a fixed
+absolute level, the bias is smaller for designs that spread the states more, so part of the noisy-case gain
+may come from a higher effective SNR; the noise-free case (\mFOfullinf$\times$) isolates the coverage effect.
+An instrumental-variable estimator would be the natural next step. (v) The surrogate design used short runs (20 iterations); longer runs on a fixed
 surrogate helped little, so the benefit depends on re-identifying between rounds. (vi) The converged
 optima depend on the machine (\S3), so only statistics over seeds, not single converged values, should be
 compared.
 
 \textbf{Unsuccessful attempts} (kept in the package): $P=5$ violated the steady-state rule for the
 optimised signal; a first gradient check with a too small step reported false errors; PyTorch could
-not be installed, so all gradients were derived by hand. An early test of the extension pipeline used state-relative
-SNR, which penalised designs that excite the system more; it was replaced by fixed absolute sensor noise
-before the final runs because a real sensor's noise does not depend on the input.
+not be installed, so all gradients were derived by hand. An early test of the extension pipeline on seed 0 used
+state-relative SNR, which penalises designs that excite the system more. After seeing that test we changed to
+fixed absolute sensor noise, because a real sensor's noise does not depend on the input; this was a choice
+made after an early result, and the noise-free case, which does not depend on it, shows the same ranking.
 
 \textbf{Research use.} The extension suggests a practical recipe for robotics and UAV identification,
 where the dynamics are unknown and test time is expensive: one short random-phase experiment, a local

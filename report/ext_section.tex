@@ -44,7 +44,12 @@ cross-validation on the training data only \citep{Ljung1999}.
 points drawn uniformly in $\Dz$ (the region the user asked to model); $e_{\mathrm{sim}}$, the free-run
 simulation NRMSE of $(x_1,x_2)$ on five new random-phase multisines at the design level (std 160\,N) and
 at 1.5$\times$ that level (240\,N, stress test). \emph{Statistics}: medians over the 20 paired seeds and
-a one-sided paired Wilcoxon signed-rank test against \st{R} \citep{Wilcoxon1945}.
+a one-sided paired Wilcoxon signed-rank test against \st{R} \citep{Wilcoxon1945}, with a diverged simulation
+ranked as the worst result. The $p$-values are unadjusted; all \mNTests{} tests are listed in the package,
+and every $e_{\mathrm{uni}}$ improvement also survives a Bonferroni correction (all $p\le\mMaxPeuni$).
+The two test types favour different designs: $e_{\mathrm{uni}}$ weights all of $\Dz$ equally, including
+state combinations a random-phase input rarely reaches, while the random-phase free-run tests at 160\,N live
+where random-phase training data are dense.
 
 \begin{table}[t]\centering\scriptsize\setlength{\tabcolsep}{2.6pt}
 \caption{Extension results, medians over \mNExt{} seeds. $^*$: better than random, $^\circ$: worse
@@ -70,7 +75,12 @@ to \mXOfullfortyeuni\,\% (optimised), a median paired improvement of \mFOfullfor
 (\mWinOfullfortyeuni/\mNExt{} seeds better, $p$\,\mPOfullfortyeuni). The early-stopped designs, which
 match the paper's cost level, already give \mFOtwentyforty$\times$, so most of the gain comes from the
 first iterations. Schroeder also beats random phases over $\Dz$ (\mFSforty$\times$), but far less. The gain shrinks with noise (\mFOfullinf$\times$ clean, \mFOfullthirty$\times$ at
-30\,dB) but stays significant. Fig.~\ref{fig:ext}b (left) shows the mechanism: for every design the error
+30\,dB) but stays significant. It is not an artefact of the cross-validated ridge parameter: with the same
+fixed $\lambda$ for every design the gain is \mFixFAforty$\times$ ($\lambda=10^{-6}$) and
+\mFixFBforty$\times$ ($\lambda=10^{-4}$) at 40\,dB. The Schroeder result, however, is sensitive to $\lambda$
+(\mFixSAforty\,\% vs.\ \mFixSBforty\,\%), and its error even drops at 30\,dB, where cross-validation picks a
+larger $\lambda$: for designs that leave parts of $\Dz$ empty, $e_{\mathrm{uni}}$ measures extrapolation, and
+that depends on the regulariser. Fig.~\ref{fig:ext}b (left) shows the mechanism: for every design the error
 falls with the local data density; the random-phase input leaves large parts of $\Dz$ at densities below
 $10^{-2}$, where the model only extrapolates, while the optimised input leaves almost none.
 
@@ -87,15 +97,21 @@ Schroeder, with the lowest crest factor, gives the worst free-run model at the d
 \textbf{E2: the design still works when the model is unknown.} Designing on a model identified from one
 random-phase period keeps a \mFOsurforty$\times$ improvement (\mXOsurfortyeuni\,\%), even though the
 surrogate predicts the coverage poorly: the true cost of \st{Osur} is \mXOsurfortyCtrue{} while the
-surrogate predicted far lower; \mXOsurfortydivTot{} of its 200 free-run simulations diverged. One re-identification round (\st{Oiter}) moves the true cost to
-\mXOiterfortyCtrue{} and the gain to \mFOiterforty$\times$. Running 100 iterations on the first surrogate
-(\st{Osur100}) helps only a little (\mFOsurOneZeroZeroforty$\times$, true cost
-\mXOsurOneZeroZerofortyCtrue): the optimiser lowers the \emph{surrogate's} cost, partly by exploiting its
-errors outside the data, so re-identifying after a short design is worth more than more iterations on a
-fixed model.
+surrogate predicted \mChatOsur; \mXOsurfortydivTot{} of its 200 free-run simulations diverged. One
+re-identification round (\st{Oiter}) moves the true cost to \mXOiterfortyCtrue{} and the gain to
+\mFOiterforty$\times$. Running 100 iterations on the first surrogate (\st{Osur100}) gives
+\mFOsurOneZeroZeroforty$\times$ (true cost \mXOsurOneZeroZerofortyCtrue): the optimiser lowers the
+\emph{surrogate's} cost, partly by exploiting its errors outside the data. The budgets differ: \st{Osur} and
+\st{Osur100} use two experiments, \st{Oiter} three and 40 surrogate iterations; every final model is still
+identified from one period of the last experiment only. In our runs, a second identification round gained
+more than 80 extra iterations on the first surrogate; we did not test this difference statistically.
 
-\textbf{E3: the cost predicts model quality.} Over all designs and seeds, the space-filling cost on the
-true system and the model error are strongly rank-correlated (Spearman $\rho=\mRhoforty$ at 40\,dB,
-\mRhoinf{} clean, \mRhothirty{} at 30\,dB; Fig.~\ref{fig:ext}a right). The cost is therefore a cheap,
-model-free proxy for the accuracy of a local nonlinear model over $\Dz$, which supports the premise of
-the paper with evidence it does not provide.
+\textbf{E3: the cost predicts model quality, but only coarsely.} Across design families the space-filling
+cost on the true system ranks the model error (pooled Spearman $\rho=\mRhoforty$ at 40\,dB, \mRhoinf{} clean,
+\mRhothirty{} at 30\,dB; Fig.~\ref{fig:ext}a right; descriptive only, as the seeds of one design are not
+independent families). It also holds within the random-phase designs ($\rho=\mRhoInR$) and over the
+three optimised stopping points together ($\rho=\mRhoOpt$, $p$\mRhoOptP), but among the converged designs
+alone it disappears ($\rho=\mRhoInOfull$, $p$\mRhoInPOfull): once $\Dz$ is well covered, further cost
+reductions no longer predict the error. The cost is therefore a useful indicator of whether a dataset covers
+$\Dz$, not a fine predictor of model accuracy; it also needs the measured or simulated states, so it can
+only be checked after the experiment or on a model.

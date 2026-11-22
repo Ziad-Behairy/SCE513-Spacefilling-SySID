@@ -17,6 +17,7 @@ m4:              ## M4 additions to the reproduction (MC rerun with phases, H1 f
 
 extension:       ## bonus extension (needs results/mc_phases), ~1 h on 2 cores
 	cd code && $(PY) -m ext.run_extension 1 20
+	cd code && $(PY) -m ext.run_fixed_lambda
 
 analysis:        ## M4 figures, tables and results/numbers_m4.tex
 	cd code && $(PY) m4_analysis.py

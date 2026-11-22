@@ -75,17 +75,26 @@ converged costs differ by a few percent (reported in the report, Sec. 3). Use th
 | `code/ext/ident.py` | extension: RBF ridge least squares with cross-validated λ | — |
 | `code/ext/surrogate.py` | extension: simulation + adjoint gradient of the identified model | — |
 | `code/ext/run_extension.py` | extension experiments (8 designs × 3 noise levels × 20 seeds) | — |
+| `code/ext/run_fixed_lambda.py` | extension robustness: same fixed ridge λ for every design | — |
+| `code/run_parallel.py` | runs all M4/extension seeds on many cores (`make parallel N=8`) | — |
 | `code/m4_analysis.py` | M4 figures, tables, statistics, `numbers_m4.tex` | — |
 
 ## 5. Results → report map
 
 | Report item | File(s) | Script |
 |---|---|---|
-| Table 1 (comparison) | `numbers.tex`, `numbers_m4.tex`, `comparison_table.csv` | `make_figures.py`, `m4_analysis.py` |
+| Tables 1–3 (result map, settings, checks) | `config.py`, `diagnostics.json`, `validation.json` | `diagnostics.py`, `validation.py` |
+| Table 4 (published vs. reproduced) | `numbers.tex`, `numbers_m4.tex`, `comparison_table.csv` | `make_figures.py`, `m4_analysis.py` |
+| Table 5 (ε re-optimisation) | `eps_reopt.json` | `run_eps_reopt.py` |
+| Table 6 (extension) | `ext_table.tex`, `ext_table.csv`, `ext/` | `m4_analysis.py` |
 | Fig. 1 (side views, T3) | `fig4_side_views.png` | `make_figures.py` |
-| Fig. 2 (T7 + H1) | `fig_h1.png`, `h1_fmincon/`, `mc_phases/` | `m4_analysis.py` |
-| Table 2, Figs. 3–4 (extension) | `ext_table.csv`, `fig_ext_accuracy.png`, `fig_ext_mechanism.png`, `ext/` | `m4_analysis.py` |
-| Other M3 figures (T1, T4–T6, diagnostics) | `fig3_signal.png`, `fig5_3d.png`, `fig6_slices.png`, `fig7_schroeder.png`, `fig_diagnostics.png` | `make_figures.py` |
+| Fig. 2 (signal, T1) | `fig3_signal.png` | `make_figures.py` |
+| Fig. 3 (slices T5, Schroeder T6, cost history) | `fig6_slices.png`, `fig7_schroeder.png`, `fig_cost_history.png` | `make_figures.py` |
+| Fig. 4 (T7 + H1) | `fig_h1.png`, `h1_fmincon/`, `mc_phases/` | `m4_analysis.py` |
+| Fig. 5 (surrogate loop) | drawn in LaTeX | — |
+| Fig. 6 (extension) | `fig_ext_accuracy.png`, `fig_ext_mechanism.png` | `m4_analysis.py` |
+| Extension robustness (fixed λ) | `ext_fixed_lambda.json` | `ext/run_fixed_lambda.py` |
+| In the package only | `fig5_3d.png` (T4), `fig8_boxplot.png` (M3 version of T7), `fig_diagnostics.png` | `make_figures.py` |
 
 ## 6. Attribution and AI use
 No code of the authors exists or is used; the method and parameters are from the paper (cited). Paper

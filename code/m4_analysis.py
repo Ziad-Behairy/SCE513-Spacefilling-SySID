@@ -79,6 +79,14 @@ def repro():
             mac(f"{m}{key}Med", s["median"] * scale, f)
             mac(f"{m}{key}Min", s["min"] * scale, f)
             mac(f"{m}{key}Max", s["max"] * scale, f)
+    # numbers that the report used to type by hand, now read from the result files
+    D = {x["name"].split()[0]: x["info"] for x in json.load(open(os.path.join(R, "diagnostics.json")))}
+    mac("GradErr", float(re.search(r"= ([0-9.e+-]+);", D["D6"]).group(1)), "{:.1e}")
+    rad = re.findall(r"([0-9]\.[0-9]+)", D["D7"])
+    mac("RadZero", float(rad[0]), "{:.4f}"); mac("RadTwo", float(rad[-1]), "{:.4f}")
+    s44 = json.load(open(os.path.join(R, "sec44.json")))
+    mac("EvalTime", s44["time_s"] / s44["nfev"], "{:.2f}")
+    mac("LineDB", 20 * np.log10(cfg.AMP * cfg.N / 2), "{:.1f}")
     # Schroeder through the same diagnostics
     uS = signals.multisine(signals.schroeder_phases())
     XS = system.steady_state_response(uS)[0]
@@ -87,6 +95,10 @@ def repro():
     out["schroeder"] = {"C": float(cost.cost(ZS)), "CF": float(signals.crest_factor(uS)),
                         "kappa": float(cost.coverage(ZS)[0]), "ss_period": p_ok}
     mac("SchSS", str(p_ok))
+    ci = np.array([x["C"] for x in rows["init"]])
+    cf = np.array([x["C"] for x in rows["full"]])
+    mac("NSchBelowRand", str(int(np.sum(out["schroeder"]["C"] < ci))))
+    mac("NOptBelowSch", str(int(np.sum(cf < out["schroeder"]["C"]))))
     # iterations to reach the paper's 3.88
     k = [int(np.argmax(np.array(r["history"]) <= cfg.PAPER["C_opt"])) for r in runs]
     out["iters_to_paper"] = q(k)
@@ -133,6 +145,8 @@ def repro():
     if os.path.exists(p):
         E = json.load(open(p))
         out["eps_reopt"] = E
+        mac("EpsKapMin", 100 * min(r["kappa_opt"] for r in E), "{:.1f}")
+        mac("EpsKapMax", 100 * max(r["kappa_opt"] for r in E), "{:.1f}")
         for row, nm in zip(E, ["A", "B", "C", "D"]):
             mac(f"Eps{nm}Init", row["C_init"], "{:.1f}"); mac(f"Eps{nm}Opt", row["C_opt"], "{:.3g}")
             mac(f"Eps{nm}Ratio", row["ratio"], "{:.0f}"); mac(f"Eps{nm}CF", row["CF_opt"])
@@ -147,6 +161,9 @@ LAB = {"R": "random", "S": "Schroeder", "O16": "opt. 16 it.", "O20": "opt. 20 it
 COL = {"R": "#1f77b4", "S": "#7b3fa0", "O16": "#f4a261", "O20": "#e76f51", "Ofull": "#e8590c",
        "Osur": "#2a9d8f", "Oiter": "#264653", "Osur100": "#8ab17d"}
 LEV = [("inf", "noise-free"), ("40", "40 dB"), ("30", "30 dB")]
+
+
+PVALS = []
 
 
 def extension():
@@ -177,12 +194,12 @@ def extension():
                 for m in ("e_uni", "e_sim160", "e_sim240"):
                     a = np.array([r["levels"][lk][d][m] for r in runs if d in r["levels"][lk]], float)
                     b = np.array([r["levels"][lk]["R"][m] for r in runs if d in r["levels"][lk]], float)
-                    ok = np.isfinite(a) & np.isfinite(b)
-                    try:
-                        pv = stats.wilcoxon(a[ok], b[ok], alternative="less").pvalue
-                    except ValueError:
-                        pv = np.nan
-                    pv2 = stats.wilcoxon(a[ok], b[ok], alternative="greater").pvalue if ok.sum() > 5 else np.nan
+                    # a diverged simulation (inf) is ranked as the worst possible result, not dropped
+                    a = np.where(np.isfinite(a), a, 1e6); b = np.where(np.isfinite(b), b, 1e6)
+                    ok = np.ones(len(a), bool)
+                    pv = stats.wilcoxon(a, b, alternative="less").pvalue
+                    pv2 = stats.wilcoxon(a, b, alternative="greater").pvalue
+                    PVALS.append((d, lk, m, pv))
                     row[f"p_{m}"] = pv; row[f"pworse_{m}"] = pv2
                     mac(f"P{d}_{lk}_{m}", "$<0.001$" if pv < 1e-3 else f"$={pv:.3f}$")
                     mac(f"Pw{d}_{lk}_{m}", "$<0.001$" if pv2 < 1e-3 else f"$={pv2:.3f}$")
@@ -201,6 +218,25 @@ def extension():
         rho, pv = stats.spearmanr(c, e)
         out[f"spearman_{lk}"] = (float(rho), float(pv))
         mac(f"Rho_{lk}", rho, "{:.2f}")
+    for d in ("R", "O20", "Ofull", "Osur"):
+        c = [r["levels"]["40"][d]["C_true"] for r in runs]; e = [r["levels"]["40"][d]["e_uni"] for r in runs]
+        rho, pv = stats.spearmanr(c, e)
+        mac(f"RhoIn_{d}", rho, "{:.2f}"); mac(f"RhoInP_{d}", "$<0.001$" if pv < 1e-3 else f"$={pv:.2f}$")
+    opt = [(r["levels"]["40"][d]["C_true"], r["levels"]["40"][d]["e_uni"]) for r in runs for d in ("O16", "O20", "Ofull")]
+    rho, pv = stats.spearmanr(*zip(*opt))
+    mac("RhoOpt", rho, "{:.2f}"); mac("RhoOptP", "$<0.001$" if pv < 1e-3 else f"$={pv:.2f}$")
+    mac("ChatOsur", float(np.median([r["levels"]["40"]["Osur"]["C_hat"] for r in runs])), "{:.3g}")
+    pe = [p for (d, lk, m, p) in PVALS if m == "e_uni"]
+    mac("NTests", str(len(PVALS))); mac("MaxPeuni", "10^{%d}" % int(np.ceil(np.log10(max(pe)))))
+    mac("BonfOK", "yes" if max(pe) <= 0.01 / len(PVALS) else "no")
+    fl = os.path.join(R, "ext_fixed_lambda.json")
+    if os.path.exists(fl):
+        FL = json.load(open(fl))
+        for lam, nm in (("1e-06", "A"), ("0.0001", "B")):
+            for lk in ("inf", "40", "30"):
+                E = FL[lam][lk]
+                mac(f"FixF{nm}_{lk}", float(np.median(np.array(E["R"]) / np.array(E["Ofull"]))), "{:.1f}")
+                mac(f"FixS{nm}_{lk}", 100 * float(np.median(E["S"])), "{:.1f}")
     with open(os.path.join(R, "ext_table.csv"), "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=sorted({k for t in table for k in t}, key=lambda k: (k not in ("level", "design"), k)))
         w.writeheader(); w.writerows(table)
@@ -214,12 +250,9 @@ def extension():
         if d == "R":
             return ""
         a = np.array([r["levels"][lk][d][m] for r in runs], float); b = np.array([r["levels"][lk]["R"][m] for r in runs], float)
-        ok = np.isfinite(a) & np.isfinite(b)
-        try:
-            p_better = stats.wilcoxon(a[ok], b[ok], alternative="less").pvalue
-            p_worse = stats.wilcoxon(a[ok], b[ok], alternative="greater").pvalue
-        except ValueError:
-            return ""
+        a = np.where(np.isfinite(a), a, 1e6); b = np.where(np.isfinite(b), b, 1e6)
+        p_better = stats.wilcoxon(a, b, alternative="less").pvalue
+        p_worse = stats.wilcoxon(a, b, alternative="greater").pvalue
         return "$^{*}$" if p_better < 0.01 else ("$^{\\circ}$" if p_worse < 0.01 else "")
     lines = ["\\begin{tabular}{@{}lrrrrrrr@{}}\\toprule",
              " & \\multicolumn{3}{c}{$e_{\\mathrm{uni}}$ [\\%]} & \\multicolumn{2}{c}{$e_{\\mathrm{sim}}$ [\\%], 40 dB} & & \\\\",
@@ -261,6 +294,9 @@ def extension():
         e = [r["levels"][lk][d]["e_uni"] * 100 for r in runs if d in r["levels"][lk]]
         ax[1].loglog(c, e, "o", ms=2.5, color=COL[d], alpha=0.8)
     ax[1].set_xlabel(r"cost $C_\theta$ on the true system")
+    for d in DES:
+        ax[1].plot([], [], "o", ms=3, color=COL[d], label=LAB[d])
+    ax[1].legend(fontsize=5.5, frameon=False, loc="upper left", handletextpad=0.1, labelspacing=0.2)
     ax[1].set_ylabel("NRMSE [%] (40 dB)")
     ax[1].set_title(fr"Spearman $\rho$ = {out['spearman_40'][0]:.2f}", fontsize=8)
     ax[1].grid(alpha=0.3, which="both")
@@ -294,7 +330,8 @@ def extension():
                           whiskerprops=dict(color=COL[d]), capprops=dict(color=COL[d]), flierprops=dict(markeredgecolor=COL[d], ms=2))
     for d in show2:
         ax[1].plot([], [], "s", color=COL[d], label=LAB[d])
-    ax[1].legend(ncol=3, fontsize=6, frameon=False, loc="upper left", handletextpad=0.3, columnspacing=0.8)
+    ax[1].legend(ncol=3, fontsize=6, frameon=False, loc="lower left", bbox_to_anchor=(0.0, 1.0),
+                 handletextpad=0.3, columnspacing=0.8)
     ax[1].set_xticks([0, 1], ["test std 160 N\n(design level)", "test std 240 N\n(stress test)"])
     ax[1].set_yscale("log")
     ax[1].set_ylabel("free-run NRMSE [%] (40 dB)")

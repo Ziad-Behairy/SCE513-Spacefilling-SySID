@@ -40,17 +40,26 @@
 \newcommand{\mkappainitMed}{36.7}
 \newcommand{\mkappainitMin}{28.3}
 \newcommand{\mkappainitMax}{50.3}
+\newcommand{\mGradErr}{3.6e-10}
+\newcommand{\mRadZero}{0.9925}
+\newcommand{\mRadTwo}{0.9980}
+\newcommand{\mEvalTime}{0.34}
+\newcommand{\mLineDB}{84.7}
 \newcommand{\mSchSS}{4}
+\newcommand{\mNSchBelowRand}{18}
+\newcommand{\mNOptBelowSch}{20}
 \newcommand{\mItPaperMed}{18.5}
-\newcommand{\mNHone}{7}
-\newcommand{\mHoneMed}{4.65}
+\newcommand{\mNHone}{10}
+\newcommand{\mHoneMed}{4.02}
 \newcommand{\mHoneMin}{2.50}
 \newcommand{\mHoneMax}{7.62}
-\newcommand{\mHoneQOne}{3.44}
-\newcommand{\mHoneQThree}{7.18}
+\newcommand{\mHoneQOne}{3.40}
+\newcommand{\mHoneQThree}{6.44}
 \newcommand{\mHoneGrad}{16.2}
-\newcommand{\mHoneTime}{12.2}
-\newcommand{\mHoneSeeds}{0, 1, 2, 6, 7, 8, 9}
+\newcommand{\mHoneTime}{12.3}
+\newcommand{\mHoneSeeds}{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+\newcommand{\mEpsKapMin}{57.4}
+\newcommand{\mEpsKapMax}{61.2}
 \newcommand{\mEpsAInit}{1829.9}
 \newcommand{\mEpsAOpt}{1.38}
 \newcommand{\mEpsARatio}{1324}
@@ -110,7 +119,7 @@
 \newcommand{\mWinSinfesimonesixty}{1}
 \newcommand{\mPSinfesimtwoforty}{$<0.001$}
 \newcommand{\mPwSinfesimtwoforty}{$=1.000$}
-\newcommand{\mWinSinfesimtwoforty}{19}
+\newcommand{\mWinSinfesimtwoforty}{20}
 \newcommand{\mXOsixteeninfeuni}{2.2}
 \newcommand{\mXOsixteeninfeuniQOne}{2.1}
 \newcommand{\mXOsixteeninfeuniQThree}{2.3}
@@ -132,7 +141,7 @@
 \newcommand{\mWinOsixteeninfesimonesixty}{8}
 \newcommand{\mPOsixteeninfesimtwoforty}{$<0.001$}
 \newcommand{\mPwOsixteeninfesimtwoforty}{$=1.000$}
-\newcommand{\mWinOsixteeninfesimtwoforty}{19}
+\newcommand{\mWinOsixteeninfesimtwoforty}{20}
 \newcommand{\mXOtwentyinfeuni}{2.2}
 \newcommand{\mXOtwentyinfeuniQOne}{2.0}
 \newcommand{\mXOtwentyinfeuniQThree}{2.3}
@@ -154,7 +163,7 @@
 \newcommand{\mWinOtwentyinfesimonesixty}{7}
 \newcommand{\mPOtwentyinfesimtwoforty}{$<0.001$}
 \newcommand{\mPwOtwentyinfesimtwoforty}{$=1.000$}
-\newcommand{\mWinOtwentyinfesimtwoforty}{19}
+\newcommand{\mWinOtwentyinfesimtwoforty}{20}
 \newcommand{\mXOfullinfeuni}{1.7}
 \newcommand{\mXOfullinfeuniQOne}{1.7}
 \newcommand{\mXOfullinfeuniQThree}{1.8}
@@ -176,7 +185,7 @@
 \newcommand{\mWinOfullinfesimonesixty}{5}
 \newcommand{\mPOfullinfesimtwoforty}{$<0.001$}
 \newcommand{\mPwOfullinfesimtwoforty}{$=1.000$}
-\newcommand{\mWinOfullinfesimtwoforty}{19}
+\newcommand{\mWinOfullinfesimtwoforty}{20}
 \newcommand{\mXOsurinfeuni}{2.9}
 \newcommand{\mXOsurinfeuniQOne}{2.6}
 \newcommand{\mXOsurinfeuniQThree}{4.9}
@@ -198,7 +207,7 @@
 \newcommand{\mWinOsurinfesimonesixty}{9}
 \newcommand{\mPOsurinfesimtwoforty}{$<0.001$}
 \newcommand{\mPwOsurinfesimtwoforty}{$=1.000$}
-\newcommand{\mWinOsurinfesimtwoforty}{19}
+\newcommand{\mWinOsurinfesimtwoforty}{20}
 \newcommand{\mXOiterinfeuni}{2.1}
 \newcommand{\mXOiterinfeuniQOne}{1.9}
 \newcommand{\mXOiterinfeuniQThree}{2.3}
@@ -220,7 +229,7 @@
 \newcommand{\mWinOiterinfesimonesixty}{9}
 \newcommand{\mPOiterinfesimtwoforty}{$<0.001$}
 \newcommand{\mPwOiterinfesimtwoforty}{$=1.000$}
-\newcommand{\mWinOiterinfesimtwoforty}{19}
+\newcommand{\mWinOiterinfesimtwoforty}{20}
 \newcommand{\mXRfortyeuni}{19.0}
 \newcommand{\mXRfortyeuniQOne}{15.7}
 \newcommand{\mXRfortyeuniQThree}{21.8}
@@ -255,7 +264,7 @@
 \newcommand{\mWinSfortyesimonesixty}{1}
 \newcommand{\mPSfortyesimtwoforty}{$<0.001$}
 \newcommand{\mPwSfortyesimtwoforty}{$=1.000$}
-\newcommand{\mWinSfortyesimtwoforty}{18}
+\newcommand{\mWinSfortyesimtwoforty}{20}
 \newcommand{\mXOsixteenfortyeuni}{2.7}
 \newcommand{\mXOsixteenfortyeuniQOne}{2.6}
 \newcommand{\mXOsixteenfortyeuniQThree}{2.9}
@@ -277,7 +286,7 @@
 \newcommand{\mWinOsixteenfortyesimonesixty}{4}
 \newcommand{\mPOsixteenfortyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOsixteenfortyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOsixteenfortyesimtwoforty}{18}
+\newcommand{\mWinOsixteenfortyesimtwoforty}{20}
 \newcommand{\mXOtwentyfortyeuni}{2.6}
 \newcommand{\mXOtwentyfortyeuniQOne}{2.5}
 \newcommand{\mXOtwentyfortyeuniQThree}{2.9}
@@ -299,7 +308,7 @@
 \newcommand{\mWinOtwentyfortyesimonesixty}{5}
 \newcommand{\mPOtwentyfortyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOtwentyfortyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOtwentyfortyesimtwoforty}{18}
+\newcommand{\mWinOtwentyfortyesimtwoforty}{20}
 \newcommand{\mXOfullfortyeuni}{2.2}
 \newcommand{\mXOfullfortyeuniQOne}{2.1}
 \newcommand{\mXOfullfortyeuniQThree}{2.4}
@@ -321,7 +330,7 @@
 \newcommand{\mWinOfullfortyesimonesixty}{5}
 \newcommand{\mPOfullfortyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOfullfortyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOfullfortyesimtwoforty}{18}
+\newcommand{\mWinOfullfortyesimtwoforty}{20}
 \newcommand{\mXOsurfortyeuni}{4.3}
 \newcommand{\mXOsurfortyeuniQOne}{3.0}
 \newcommand{\mXOsurfortyeuniQThree}{5.6}
@@ -343,7 +352,7 @@
 \newcommand{\mWinOsurfortyesimonesixty}{9}
 \newcommand{\mPOsurfortyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOsurfortyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOsurfortyesimtwoforty}{17}
+\newcommand{\mWinOsurfortyesimtwoforty}{19}
 \newcommand{\mXOiterfortyeuni}{2.7}
 \newcommand{\mXOiterfortyeuniQOne}{2.4}
 \newcommand{\mXOiterfortyeuniQThree}{3.2}
@@ -365,7 +374,7 @@
 \newcommand{\mWinOiterfortyesimonesixty}{6}
 \newcommand{\mPOiterfortyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOiterfortyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOiterfortyesimtwoforty}{18}
+\newcommand{\mWinOiterfortyesimtwoforty}{20}
 \newcommand{\mXOsurOneZeroZerofortyeuni}{3.7}
 \newcommand{\mXOsurOneZeroZerofortyeuniQOne}{3.1}
 \newcommand{\mXOsurOneZeroZerofortyeuniQThree}{4.4}
@@ -387,7 +396,7 @@
 \newcommand{\mWinOsurOneZeroZerofortyesimonesixty}{5}
 \newcommand{\mPOsurOneZeroZerofortyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOsurOneZeroZerofortyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOsurOneZeroZerofortyesimtwoforty}{17}
+\newcommand{\mWinOsurOneZeroZerofortyesimtwoforty}{19}
 \newcommand{\mXRthirtyeuni}{22.2}
 \newcommand{\mXRthirtyeuniQOne}{19.4}
 \newcommand{\mXRthirtyeuniQThree}{24.6}
@@ -422,7 +431,7 @@
 \newcommand{\mWinSthirtyesimonesixty}{0}
 \newcommand{\mPSthirtyesimtwoforty}{$<0.001$}
 \newcommand{\mPwSthirtyesimtwoforty}{$=1.000$}
-\newcommand{\mWinSthirtyesimtwoforty}{19}
+\newcommand{\mWinSthirtyesimtwoforty}{20}
 \newcommand{\mXOsixteenthirtyeuni}{4.3}
 \newcommand{\mXOsixteenthirtyeuniQOne}{3.8}
 \newcommand{\mXOsixteenthirtyeuniQThree}{4.7}
@@ -444,7 +453,7 @@
 \newcommand{\mWinOsixteenthirtyesimonesixty}{11}
 \newcommand{\mPOsixteenthirtyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOsixteenthirtyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOsixteenthirtyesimtwoforty}{19}
+\newcommand{\mWinOsixteenthirtyesimtwoforty}{20}
 \newcommand{\mXOtwentythirtyeuni}{4.0}
 \newcommand{\mXOtwentythirtyeuniQOne}{3.7}
 \newcommand{\mXOtwentythirtyeuniQThree}{4.4}
@@ -466,7 +475,7 @@
 \newcommand{\mWinOtwentythirtyesimonesixty}{11}
 \newcommand{\mPOtwentythirtyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOtwentythirtyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOtwentythirtyesimtwoforty}{19}
+\newcommand{\mWinOtwentythirtyesimtwoforty}{20}
 \newcommand{\mXOfullthirtyeuni}{3.6}
 \newcommand{\mXOfullthirtyeuniQOne}{3.4}
 \newcommand{\mXOfullthirtyeuniQThree}{3.9}
@@ -488,7 +497,7 @@
 \newcommand{\mWinOfullthirtyesimonesixty}{9}
 \newcommand{\mPOfullthirtyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOfullthirtyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOfullthirtyesimtwoforty}{19}
+\newcommand{\mWinOfullthirtyesimtwoforty}{20}
 \newcommand{\mXOsurthirtyeuni}{6.5}
 \newcommand{\mXOsurthirtyeuniQOne}{4.8}
 \newcommand{\mXOsurthirtyeuniQThree}{7.2}
@@ -510,7 +519,7 @@
 \newcommand{\mWinOsurthirtyesimonesixty}{6}
 \newcommand{\mPOsurthirtyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOsurthirtyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOsurthirtyesimtwoforty}{19}
+\newcommand{\mWinOsurthirtyesimtwoforty}{20}
 \newcommand{\mXOiterthirtyeuni}{4.3}
 \newcommand{\mXOiterthirtyeuniQOne}{3.9}
 \newcommand{\mXOiterthirtyeuniQThree}{4.8}
@@ -532,7 +541,7 @@
 \newcommand{\mWinOiterthirtyesimonesixty}{9}
 \newcommand{\mPOiterthirtyesimtwoforty}{$<0.001$}
 \newcommand{\mPwOiterthirtyesimtwoforty}{$=1.000$}
-\newcommand{\mWinOiterthirtyesimtwoforty}{19}
+\newcommand{\mWinOiterthirtyesimtwoforty}{20}
 \newcommand{\mFSinf}{1.9}
 \newcommand{\mFOsixteeninf}{8.6}
 \newcommand{\mFOtwentyinf}{9.0}
@@ -555,3 +564,29 @@
 \newcommand{\mRhoinf}{0.95}
 \newcommand{\mRhoforty}{0.93}
 \newcommand{\mRhothirty}{0.84}
+\newcommand{\mRhoInR}{0.93}
+\newcommand{\mRhoInPR}{$<0.001$}
+\newcommand{\mRhoInOtwenty}{0.37}
+\newcommand{\mRhoInPOtwenty}{$=0.11$}
+\newcommand{\mRhoInOfull}{0.17}
+\newcommand{\mRhoInPOfull}{$=0.47$}
+\newcommand{\mRhoInOsur}{0.89}
+\newcommand{\mRhoInPOsur}{$<0.001$}
+\newcommand{\mRhoOpt}{0.70}
+\newcommand{\mRhoOptP}{$<0.001$}
+\newcommand{\mChatOsur}{11.2}
+\newcommand{\mNTests}{57}
+\newcommand{\mMaxPeuni}{10^{-4}}
+\newcommand{\mBonfOK}{yes}
+\newcommand{\mFixFAinf}{11.4}
+\newcommand{\mFixSAinf}{15.1}
+\newcommand{\mFixFAforty}{9.4}
+\newcommand{\mFixSAforty}{18.5}
+\newcommand{\mFixFAthirty}{7.7}
+\newcommand{\mFixSAthirty}{37.9}
+\newcommand{\mFixFBinf}{10.6}
+\newcommand{\mFixSBinf}{3.5}
+\newcommand{\mFixFBforty}{9.2}
+\newcommand{\mFixSBforty}{3.9}
+\newcommand{\mFixFBthirty}{5.7}
+\newcommand{\mFixSBthirty}{6.1}
