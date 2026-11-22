@@ -1,0 +1,42 @@
+[
+  {
+    "seed": 1,
+    "C_init": 314.10685825151006,
+    "C_opt": 1.559833679714874,
+    "nit": 150,
+    "time_s": 85.36048936843872,
+    "message": "STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT"
+  },
+  {
+    "seed": 2,
+    "C_init": 237.14487846572743,
+    "C_opt": 2.9079455459415238,
+    "nit": 150,
+    "time_s": 79.1893060207367,
+    "message": "STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT"
+  },
+  {
+    "seed": 3,
+    "C_init": 167.54719098753944,
+    "C_opt": 1.2767623383818865,
+    "nit": 150,
+    "time_s": 58.540241956710815,
+    "message": "STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT"
+  },
+  {
+    "seed": 4,
+    "C_init": 213.7078194766143,
+    "C_opt": 1.4172290671735517,
+    "nit": 150,
+    "time_s": 58.7881076335907,
+    "message": "STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT"
+  },
+  {
+    "seed": 5,
+    "C_init": 254.82732255817385,
+    "C_opt": 2.1998386003046253,
+    "nit": 150,
+    "time_s": 60.56719446182251,
+    "message": "STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT"
+  }
+]

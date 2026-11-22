@@ -1,0 +1,9 @@
+quantity,published,reproduced,abs_diff,rel_diff_percent
+C_init (seed 0),287.1,252.6,-34.58,-12.0
+C_opt,3.88,1.217,-2.663,-68.6
+C_opt within 16-gradient budget (H1),3.88,4.674,0.794,20.5
+Ratio C_init/C_opt (vs implied 74.0),74.01,207.5,133.5,180.4
+Ratio C_init/C_opt (vs text 69),69,207.5,138.5,200.7
+Crest factor Schroeder (l=1..184),1.87,1.879,0.008809,0.5
+Crest factor Schroeder (l=21..204),1.87,1.896,0.02553,1.4
+Crest factor optimized,3.67,3.101,-0.5689,-15.5

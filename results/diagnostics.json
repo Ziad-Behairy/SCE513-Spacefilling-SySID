@@ -1,0 +1,42 @@
+[
+  {
+    "name": "D1 input",
+    "pass": true,
+    "info": "mean=-6.8e-15 N, std=160.000000 N, lines 21..204 (184), A=16.6812 N, max|A_l-A|=6.4e-13"
+  },
+  {
+    "name": "D2 free decay",
+    "pass": true,
+    "info": "x(0)=[0.5,0]; x(10 s)=[2.99e-04, -3.20e-03]"
+  },
+  {
+    "name": "D3 steady state",
+    "pass": true,
+    "info": "accepted at period p=5; rel(P=8)=2.4e-13"
+  },
+  {
+    "name": "D4 kernel at zero distance",
+    "pass": true,
+    "info": "exp(0) = 1.000000000000000"
+  },
+  {
+    "name": "D5 cost bound",
+    "pass": true,
+    "info": "C=252.567 <= 1/eps=1000; far samples: C=1000.000000"
+  },
+  {
+    "name": "D6 gradient vs finite differences",
+    "pass": true,
+    "info": "max |g-fd|/max|g| = 3.6e-10; max per-component relative error = 1.2e-06 (h = 1e-4, 10 phases)"
+  },
+  {
+    "name": "D7 Euler stability",
+    "pass": true,
+    "info": "spectral radius at x1=0: 0.992532, at |x1|=2: 0.997988"
+  },
+  {
+    "name": "D8 grid",
+    "pass": true,
+    "info": "n=8000, spacings=[np.float64(42.1053), np.float64(0.2105), np.float64(2.1053)]"
+  }
+]

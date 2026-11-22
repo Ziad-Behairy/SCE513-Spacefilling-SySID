@@ -1,0 +1,4 @@
+# Versions used to produce the M3 results (Python 3.13.x, Linux x86_64, CPU only)
+numpy==2.5.3
+scipy==1.18.1
+matplotlib==3.11.2
