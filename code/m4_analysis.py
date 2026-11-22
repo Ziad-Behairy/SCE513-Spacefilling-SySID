@@ -117,6 +117,7 @@ def repro():
         mac("HoneTime", np.mean([r["time_s"] for r in h1]) / 60, "{:.1f}")
         seeds = ", ".join(str(r["seed"]) for r in h1)
         mac("HoneSeeds", seeds)
+        mac("HoneAbove", str(int(np.sum(cf > 5.5))))
         paper = {"min": 2.95, "q1": 3.28, "med": 3.65, "q3": 4.2, "max": 5.5, "mean": 3.8}
         c16 = [r["history"][16] for r in runs]
         c20 = [r["history"][20] for r in runs]
@@ -225,6 +226,8 @@ def extension():
     opt = [(r["levels"]["40"][d]["C_true"], r["levels"]["40"][d]["e_uni"]) for r in runs for d in ("O16", "O20", "Ofull")]
     rho, pv = stats.spearmanr(*zip(*opt))
     mac("RhoOpt", rho, "{:.2f}"); mac("RhoOptP", "$<0.001$" if pv < 1e-3 else f"$={pv:.2f}$")
+    a = [r["levels"]["40"]["R"]["e_sim160"] < r["levels"]["40"]["Ofull"]["e_sim160"] for r in runs]
+    mac("WinRvsOfullsim", str(int(np.sum(a))))
     mac("ChatOsur", float(np.median([r["levels"]["40"]["Osur"]["C_hat"] for r in runs])), "{:.3g}")
     pe = [p for (d, lk, m, p) in PVALS if m == "e_uni"]
     mac("NTests", str(len(PVALS))); mac("MaxPeuni", "10^{%d}" % int(np.ceil(np.log10(max(pe)))))

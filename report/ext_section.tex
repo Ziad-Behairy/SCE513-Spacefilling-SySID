@@ -74,7 +74,9 @@ median one-step error over $\Dz$ falls from \mXRfortyeuni\,\% (random) and \mXSf
 to \mXOfullfortyeuni\,\% (optimised), a median paired improvement of \mFOfullforty$\times$
 (\mWinOfullfortyeuni/\mNExt{} seeds better, $p$\,\mPOfullfortyeuni). The early-stopped designs, which
 match the paper's cost level, already give \mFOtwentyforty$\times$, so most of the gain comes from the
-first iterations. Schroeder also beats random phases over $\Dz$ (\mFSforty$\times$), but far less. The gain shrinks with noise (\mFOfullinf$\times$ clean, \mFOfullthirty$\times$ at
+first iterations. With the cross-validated $\lambda$, Schroeder also beats random phases over $\Dz$ (\mFSforty$\times$) but
+far less; with a fixed larger $\lambda$ the gap narrows (see below), while the optimised input stays best for
+every seed. The gain shrinks with noise (\mFOfullinf$\times$ clean, \mFOfullthirty$\times$ at
 30\,dB) but stays significant. It is not an artefact of the cross-validated ridge parameter: with the same
 fixed $\lambda$ for every design the gain is \mFixFAforty$\times$ ($\lambda=10^{-6}$) and
 \mFixFBforty$\times$ ($\lambda=10^{-4}$) at 40\,dB. The Schroeder result, however, is sensitive to $\lambda$
@@ -86,7 +88,7 @@ $10^{-2}$, where the model only extrapolates, while the optimised input leaves a
 
 \textbf{The price.} On free-run tests at the design level the picture changes: the random-phase test
 signals live exactly where random-phase training data are dense, and there the random-phase model is as
-good as or better than the optimised one (\mXRfortyesimonesixty\,\% vs.\
+better than the optimised one in \mWinRvsOfullsim{} of \mNExt{} seeds (\mXRfortyesimonesixty\,\% vs.\
 \mXOfullfortyesimonesixty\,\%; not significant at 1\,\%, $p$\mPwOfullfortyesimonesixty). The space-filling input spends the same number of samples on a larger
 region, which is a bias--variance trade-off, not a free gain. At 1.5$\times$ the amplitude the
 random-phase model fails (median \mXRfortyesimtwoforty\,\%, \mXRfortydivTot{} of its 200 free-run
@@ -108,8 +110,8 @@ more than 80 extra iterations on the first surrogate; we did not test this diffe
 
 \textbf{E3: the cost predicts model quality, but only coarsely.} Across design families the space-filling
 cost on the true system ranks the model error (pooled Spearman $\rho=\mRhoforty$ at 40\,dB, \mRhoinf{} clean,
-\mRhothirty{} at 30\,dB; Fig.~\ref{fig:ext}a right; descriptive only, as the seeds of one design are not
-independent families). It also holds within the random-phase designs ($\rho=\mRhoInR$) and over the
+\mRhothirty{} at 30\,dB; Fig.~\ref{fig:ext}a right; descriptive only, because the same 20 seeds and noise sequences are reused across designs, so the
+observations are not independent). It also holds within the random-phase designs ($\rho=\mRhoInR$) and over the
 three optimised stopping points together ($\rho=\mRhoOpt$, $p$\mRhoOptP), but among the converged designs
 alone it disappears ($\rho=\mRhoInOfull$, $p$\mRhoInPOfull): once $\Dz$ is well covered, further cost
 reductions no longer predict the error. The cost is therefore a useful indicator of whether a dataset covers

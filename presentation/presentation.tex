@@ -5,11 +5,11 @@
 \graphicspath{{../results/}}
 \input{../results/numbers.tex}
 \input{../results/numbers_m4.tex}
-\title{Space-Filling Input Design for Nonlinear State-Space Identification}
-\subtitle{Reproduction of Kiss, T\'oth \& Schoukens (SYSID 2024) --- and does better coverage give better models?}
+\title{Space-Filling Input Design for Nonlinear Identification}
+\subtitle{Reproduction of Kiss, T\'oth \& Schoukens (SYSID 2024) and an extension}
 \author{Ziad Aboelkhir \quad (g202622300)}
-\institute{SCE 513 System Identification, KFUPM, Term 261 --- Prof.\ M.\ M.\ Al-Dhaifallah}
-\date{M5 seminar}
+\institute{SCE 513 System Identification, KFUPM, Term 261}
+\date{}
 \begin{document}
 \maketitle
 
@@ -24,8 +24,8 @@ $z_k=[u_k,x_{1,k},x_{2,k}]$ fill a box $\mathcal D_z$.
 \end{itemize}
 \end{column}\begin{column}{0.42\textwidth}
 \small Space-filling cost (Eq.~8):
-\[ d_i=\sum_k e^{-\frac12\|\tilde z_i-z_k\|^2_{\Sigma^{-1}}},\qquad
-C_\theta=\frac1n\sum_{i=1}^{8000}\frac{1}{\epsilon+d_i}\]
+\[ d_i=\sum_k e^{-\frac12\|\tilde z_i-z_k\|^2_{\Sigma^{-1}}}\]
+\[ C_\theta=\frac1n\sum_{i=1}^{8000}\frac{1}{\epsilon+d_i}\]
 Empty grid point $\Rightarrow$ contributes $1/\epsilon$.
 \end{column}\end{columns}
 \end{frame}
@@ -144,7 +144,7 @@ $\lambda$), and it survives designing by adjoint on an identified nonlinear mode
 cd code
 python make_figures.py      # Figs. T1-T7 from results/*.json
 python m4_analysis.py       # H1 + extension figures, numbers_m4.tex
-cd ../tests && pytest -q    # 10 checks incl. gradient vs finite differences
+cd ../tests && pytest -q    # 10 checks incl. gradient checks
 \end{verbatim}
 \end{frame}
 \end{document}

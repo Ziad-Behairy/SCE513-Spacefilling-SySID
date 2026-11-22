@@ -67,7 +67,8 @@ def fig_history(d44):
     ax.axhline(cfg.PAPER["C_init"], color=C_INIT, ls=":", lw=1, label="paper: initial 287.15")
     ax.axhline(cfg.PAPER["C_opt"], color="k", ls="--", lw=1, label="paper: optimized 3.88")
     ax.axvline(cfg.FMINCON_GRAD_BUDGET, color="0.45", ls=(0, (1, 1.5)), lw=1.2)
-    ax.text(cfg.FMINCON_GRAD_BUDGET * 1.08, 60, "fmincon default\nbudget: 16 gradients", fontsize=7, color="0.3")
+    ax.text(0.03, 0.05, "dotted vertical line: fmincon default\nbudget of 16 gradients", fontsize=7, color="0.3",
+            transform=ax.transAxes, ha="left", va="bottom")
     ax.set_xlabel("cost + gradient evaluations (log scale)")
     ax.set_ylabel(r"best cost $C_\theta$ (log scale)")
     ax.legend(frameon=False, fontsize=7, loc="center right", bbox_to_anchor=(1.0, 0.62))

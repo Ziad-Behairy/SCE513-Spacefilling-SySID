@@ -71,9 +71,10 @@ independent implementation from the information in the paper?
 
 \textbf{Extension question (bonus).} The reference paper argues that better coverage should give better
 models but does not identify a model. Later work by the same group reports lower model error for
-space-filling inputs designed on a preliminary linear model \citep{Kiss2026}, proposes a Gaussian-process
-variant with an identify-then-redesign loop that is not evaluated \citep{Liu2025}, and online receding-horizon
-space-filling designs exist \citep{Herkersdorf2025}. Building on the reproduced designs, we test (Q1) whether
+space-filling inputs designed on a preliminary linear model \citep{Kiss2026} and proposes a Gaussian-process
+variant whose identify-then-redesign loop is not evaluated \citep{Liu2025}; receding-horizon
+\citep{Herkersdorf2025}, robust model-class \citep{Kiss2026b} and reinforcement-learning \citep{Witmeur2026}
+space-filling designs are evaluated by coverage, not by identified-model accuracy. Building on the reproduced designs, we test (Q1) whether
 a model identified from the optimised input is more accurate than one from random-phase or Schroeder inputs of
 identical spectrum, and why (local data density); (Q2) whether the benefit survives when the design is
 computed by the adjoint through an \emph{identified nonlinear} surrogate, with one re-identification round;
@@ -249,7 +250,7 @@ L-BFGS-B early. For M4 we ran an \emph{fmincon-like} optimiser: dense BFGS with 
 gradients and a hard cap of 3000 cost evaluations, no exact gradient (seeds \mHoneSeeds; \mHoneTime\,min
 each). It ends at a median of \mHoneMed{} [IQR \mHoneQOne--\mHoneQThree, range \mHoneMin--\mHoneMax] versus
 the paper's $\approx$3.65 [2.9--5.5] (Fig.~\ref{fig:h1}). The fmincon-like runs overlap the published
-box but are more spread, while the 20-iteration L-BFGS-B runs (median \nMCtMedian) match the published
+box but are more spread (\mHoneAbove{} of the 10 runs end above the paper's maximum of 5.5), while the 20-iteration L-BFGS-B runs (median \nMCtMedian) match the published
 median closely, and converged runs end about three times lower. A budget-limited quasi-Newton run
 therefore stops in the paper's cost range, and a converged one does not. This is consistent with early
 stopping (H1), but our fmincon-like emulation is more spread than the published box, so the authors' exact
@@ -259,7 +260,7 @@ The close match of the 20-iteration median was found at one of three stopping po
 \begin{figure}[t]\centering
 \includegraphics[width=0.94\columnwidth]{fig_h1.png}
 \caption{T7 and H1: final costs. Grey: paper Fig.~8 (read from the axes). Teal: fmincon-like BFGS with
-forward differences, 3000 evaluations. Blue/purple/orange: our L-BFGS-B runs (seeds 1--20) after 16 and 20
+forward differences, 3000 evaluations (10 seeds, 0--9; seed 0 is not in the L-BFGS-B set). Blue/purple/orange: our L-BFGS-B runs (seeds 1--20) after 16 and 20
 iterations and at convergence. Dotted: published 3.88.}
 \label{fig:h1}\end{figure}
 
@@ -283,7 +284,7 @@ $10^{-2}$ & \mEpsDInit & \mEpsDOpt & \mEpsDRatio & \mEpsDCref & \mEpsDKap\\
 
 \textbf{Reproduction status.} T1, T3, T4, T5: reproduced. T6: Schroeder CF reproduced (0.5\,\%), optimised
 CF partially (depends on the stopping point). T2, T7: \emph{partially reproduced}: the initial costs, the
-ranking and the early-stopped values match; the converged values are lower, explained by H1. The paper's
+ranking and the early-stopped values match; the converged values are lower, consistent with H1. The paper's
 ``69$\times$'' is inconsistent with its own numbers ($287.15/3.88=74.0$).
 
 \section{Extension: From Coverage to Model Accuracy}
