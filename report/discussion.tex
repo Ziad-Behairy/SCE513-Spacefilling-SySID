@@ -9,8 +9,9 @@ influential ones ($\epsilon$, optimiser, budget, grid, initial state). (ii) H1 i
 independent budget-limited optimisers, but \texttt{fmincon}'s interior-point steps were not reproduced
 exactly; without MATLAB it remains a hypothesis. (iii) The Fig.~8 values of the paper were read from the
 axes. (iv) The extension uses one system, one model class and simulated white sensor noise. Noisy states
-in the regressors could bias least squares (errors-in-variables, \citealp{Soderstrom2007}); E4 shows that this
-bias is small here and that the noise error is mostly variance, amplified by $\sqrt2/T_s$ in the target. With
+in the regressors could bias least squares (errors-in-variables, \citealp{Soderstrom2007}); E4 (seed 1, 15
+noise draws) shows that for the optimised design the noise error is mostly variance, amplified by $\sqrt2/T_s$ in
+the target; for random phases a larger part is bias, but both are small against the coverage error. With
 a fixed absolute noise level, designs that spread the states more also have a higher effective SNR; the
 noise-free case (\mFOfullinf$\times$) isolates the coverage effect. (v) The surrogate design used short runs (20 iterations); longer runs on a fixed
 surrogate helped little, and a second identification round appeared more useful (unequal budgets, not tested statistically). (vi) The converged

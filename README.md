@@ -41,7 +41,7 @@ against finite differences.
 
 **One main script:** `python code/run_all.py` runs the numbered workflow below in order
 (`--workers 8` for more cores, `--analysis` to redo only steps 3–6 from the stored results in ~1 min,
-`--quick` for a 5-minute smoke test). The table lists the same steps for running them one by one.
+`--quick` for a 5-minute smoke test; `--analysis` reuses the stored peak-limited runs instead of rerunning them). The table lists the same steps for running them one by one.
 
 | Step | Command | Produces | Time (2 cores) |
 |---|---|---|---|

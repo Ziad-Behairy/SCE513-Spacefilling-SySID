@@ -366,6 +366,8 @@ def practical():
             for m in ("clean", "single_mean", "mean_theta"):
                 mac(f"Split_{d}_{m}", 100 * v[m], "{:.1f}")
         mac("NRM", str(N["M"]))
+        if "lam_LS1" in N["per_seed"][seeds[0]]["S"]:
+            mac("NRlamSmallerS", str(int(sum(N["per_seed"][k]["S"]["lam_LSavg"] < N["per_seed"][k]["S"]["lam_LS1"] for k in seeds))))
         out["noise"] = N
     pk = loadfolder("ext_peak_limited")
     if pk:
@@ -378,6 +380,7 @@ def practical():
                 mac(f"Pk_{nm}_{m}", sc * float(np.median(v)), f)
             mac(f"Pk_{nm}_CFmax", float(max(r[key]["CF"] for r in pk)), "{:.2f}")
             mac(f"Pk_{nm}_div", str(int(sum(r[key]["div"] for r in pk))))
+            mac(f"Pk_{nm}_WinSch", str(int(sum(r[key]["e_uni"] < ext[r["seed"]]["levels"]["40"]["S"]["e_uni"] for r in pk))))
             rr = [ext[r["seed"]]["levels"]["40"]["R"]["e_uni"] / r[key]["e_uni"] for r in pk if r["seed"] in ext]
             mac(f"Pk_{nm}_F", float(np.median(rr)), "{:.1f}")
         # figure: practical limits
@@ -403,12 +406,17 @@ def practical():
         if "noise" in out:
             N = out["noise"]; seeds = sorted(N["per_seed"], key=int)
             ds = ["R", "S", "O20", "Ofull"]; ms = [("LS1", "LS, 1 period"), ("IV1", "IV, 1 period"), ("LSavg", f"LS, mean of {N['M']} periods")]
-            w = 0.26
+            w = 0.22
             for j, (m, lab) in enumerate(ms):
-                med = [np.median([N["per_seed"][k][d][m] for k in seeds]) * 100 for d in ds]
-                ax[1].bar(np.arange(4) + (j - 1) * w, med, w, label=lab, color=["#8d99a6", "#2a9d8f", "#264653"][j])
+                c = ["#8d99a6", "#2a9d8f", "#264653"][j]
+                for i, d in enumerate(ds):
+                    v = np.array([N["per_seed"][k][d][m] for k in seeds]) * 100
+                    q1, md, q3 = np.percentile(v, [25, 50, 75])
+                    x = i + (j - 1) * w
+                    ax[1].plot([x, x], [q1, q3], color=c, lw=1.5)
+                    ax[1].plot(x, md, "o", color=c, ms=5, label=lab if i == 0 else None)
             ax[1].set_xticks(range(4), [LAB[d] for d in ds], fontsize=7)
-            ax[1].set_yscale("log"); ax[1].set_ylabel("median $e_{\\mathrm{uni}}$ [%] (30 dB)")
+            ax[1].set_yscale("log"); ax[1].set_ylabel("$e_{\\mathrm{uni}}$ [%] (30 dB), median, IQR")
             ax[1].legend(fontsize=6, frameon=False); ax[1].grid(alpha=0.3, axis="y")
             ax[1].set_title("(b) noise: IV vs. periodic averaging", fontsize=8)
         for a_ in ax:

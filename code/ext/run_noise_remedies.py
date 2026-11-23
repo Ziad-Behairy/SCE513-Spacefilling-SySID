@@ -41,9 +41,10 @@ def measure(u, seed, n_periods=1):
     return X + noise
 
 
-def fit_ls(u, X):
+def fit_ls(u, X, return_lambda=False):
     Z, y = ident.regression_data(u, X)
-    return ident.fit(Z, y)[0]
+    theta, lam, _ = ident.fit(Z, y)
+    return (theta, lam) if return_lambda else theta
 
 
 def fit_iv(u, X):
@@ -81,7 +82,10 @@ def main():
             nseed = s + ec.NOISE_SEED_OFFSET + 200          # same noise seed as Table 6 at 30 dB
             X1 = measure(u, nseed, 1)
             Xa = measure(u, nseed, M_AVG)
-            row[d] = {"LS1": e_uni(fit_ls(u, X1)), "IV1": e_uni(fit_iv(u, X1)), "LSavg": e_uni(fit_ls(u, Xa))}
+            t1, l1 = fit_ls(u, X1, True)
+            ta, la = fit_ls(u, Xa, True)
+            row[d] = {"LS1": e_uni(t1), "IV1": e_uni(fit_iv(u, X1)), "LSavg": e_uni(ta),
+                      "lam_LS1": l1, "lam_LSavg": la}
         out["per_seed"][s] = row
         print(s, {d: {k: round(v, 4) for k, v in r.items()} for d, r in row.items()}, flush=True)
     # bias / variance split, seed 1
