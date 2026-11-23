@@ -80,6 +80,8 @@ converged costs differ by a few percent (reported in the report, Sec. 3). Use th
 | `code/ext/surrogate.py` | extension: simulation + adjoint gradient of the identified model | n/a |
 | `code/ext/run_extension.py` | extension experiments (8 designs × 3 noise levels × 20 seeds) | n/a |
 | `code/ext/run_fixed_lambda.py` | extension robustness: same fixed ridge λ for every design | n/a |
+| `code/ext/run_noise_remedies.py` | E4b: bias vs variance of the noise error; IV vs averaging of measured periods | n/a |
+| `code/ext/run_peak_limited.py` | E4a: space-filling design with an actuator peak limit (crest factor ≤ 2.5, ≤ 1.9) | n/a |
 | `code/run_parallel.py` | runs all M4/extension seeds on many cores (`make parallel N=8`) | n/a |
 | `code/m4_analysis.py` | M4 figures, tables, statistics, `numbers_m4.tex` | n/a |
 | `code/make_illustrations.py` | 3-D drawing of the test system and 3-D view of the samples (T4) | Sec. 4.1, Fig. 5 |
@@ -102,6 +104,7 @@ converged costs differ by a few percent (reported in the report, Sec. 3). Use th
 | Fig. 7 (surrogate loop) | drawn in LaTeX | n/a |
 | Fig. 8 (extension) | `fig_ext_accuracy.png`, `fig_ext_mechanism.png` | `m4_analysis.py` |
 | Extension robustness (fixed λ) | `ext_fixed_lambda.json` | `ext/run_fixed_lambda.py` |
+| E4 (peak limit, noise remedies) and its figure | `ext_peak_limited/`, `ext_noise_remedies.json`, `fig_ext_practical.png` | `ext/run_peak_limited.py`, `ext/run_noise_remedies.py`, `m4_analysis.py` |
 | In the package only | `fig5_3d.png` (M3 version of T4), `fig8_boxplot.png` (M3 version of T7), `fig_diagnostics.png` | `make_figures.py` |
 
 ## 6. Attribution and AI use

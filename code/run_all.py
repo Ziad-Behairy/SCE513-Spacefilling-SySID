@@ -6,6 +6,8 @@ Numbered workflow (each step is restart-safe: finished seeds are skipped):
   2. run_parallel.py       M4: Monte Carlo with stored phases (seeds 1-20), H1 fmincon-like test
                            (seeds 0-9), epsilon re-optimisation, extension (seeds 1-20)
   3. ext/run_fixed_lambda  extension robustness check (fixed ridge lambda)
+     ext/run_noise_remedies E4b: bias vs variance, IV vs periodic averaging
+     ext/run_peak_limited   E4a: design with an actuator peak limit (seeds 1-20)
   4. m4_analysis.py        M4 figures, tables, statistics, results/numbers_m4.tex
   5. make_illustrations.py 3-D drawings (needs PyVista; skipped with a warning if missing)
   6. pdflatex/bibtex       report/report.pdf (skipped if LaTeX is not installed)
@@ -58,6 +60,9 @@ if __name__ == "__main__":
         step("1. M3 core reproduction", [PY, "main.py"])
         step("2. M4 runs and extension (parallel)", [PY, "run_parallel.py", str(a.workers)])
     step("3. extension robustness (fixed lambda)", [PY, "-m", "ext.run_fixed_lambda"])
+    step("3b. E4 noise remedies (IV, averaging)", [PY, "-m", "ext.run_noise_remedies"])
+    if not a.analysis:
+        step("3c. E4 peak-limited design", [PY, "-m", "ext.run_peak_limited", "1", "20"])
     step("4. M4 analysis", [PY, "m4_analysis.py"])
     step("5. illustrations", [PY, "make_illustrations.py"], optional=True)
     build_report()

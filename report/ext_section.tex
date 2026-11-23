@@ -117,3 +117,30 @@ alone it disappears ($\rho=\mRhoInOfull$, $p$\mRhoInPOfull): once $\Dz$ is well 
 reductions no longer predict the error. The cost is therefore a useful indicator of whether a dataset covers
 $\Dz$, not a fine predictor of model accuracy; it also needs the measured or simulated states, so it can
 only be checked after the experiment or on a model.
+
+
+\textbf{E4: two practical limits.} \emph{(a) Actuator peaks.} The optimised signals have higher force
+peaks than Schroeder for the same power. We added the penalty $\rho\sum_k\max(0,|u_k|-U_{\max})^2$,
+$U_{\max}=\mathrm{CF}_{\max}\cdot160$\,N, to Eq.~\eqref{eq:cost} and ran 100 L-BFGS-B iterations from
+$\varphi_0(s)$ for \mNPeak{} seeds (Fig.~\ref{fig:prac}a). With $\mathrm{CF}\le1.9$, the Schroeder level, the
+model error is \mPkOneNineeuni\,\% (\mPkOneNineF$\times$ better than random) against \mPkInfeuni\,\% without the
+limit, with no divergence: the coverage cost rises from \mPkInfCtrue{} to \mPkOneNineCtrue, but the error grows only
+from \mPkInfeuni\,\% to \mPkOneNineeuni\,\%. The
+gain comes from where the samples go, not from higher peaks, so the method fits an actuator limit.
+\emph{(b) Noise: bias or variance?} For seed~1, averaging $\hat\theta$ over 15 noise draws brings the
+\st{Ofull} error from \mSplitOfullsinglemean\,\% to \mSplitOfullmeantheta\,\% (noise-free: \mSplitOfullclean\,\%): at
+30\,dB the noise error is almost all variance, and the errors-in-variables bias is small. In line with this,
+an IV estimator with lagged states as instruments \citep{Ljung1999} does not help (\mNROfullIVOne\,\% vs.\
+\mNROfullLSOne\,\%, better in \mNRivwinOfull/20 seeds), while averaging $M=\mNRM$ measured periods, which the periodic
+input allows, lowers the error to \mNROfullLSavg\,\% (\mNRwinOfull/20 seeds, $p$\mNRpOfull; $M$ times longer
+measurement for every design). For random phases the gain is small (\mNRRLSOne\,\% to \mNRRLSavg\,\%) because
+their error comes from missing coverage, not from noise; for Schroeder averaging even hurts
+(\mNRSLSOne\,\% to \mNRSLSavg\,\%), since cross-validation then picks a smaller $\lambda$ and its empty regions are
+extrapolated differently. Coverage first, then averaging, is the order that pays.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\columnwidth]{fig_ext_practical.png}
+\caption{E4. (a) Model error (40\,dB) of designs with an actuator peak limit, 100 iterations, against random
+phases and Schroeder; CF = crest factor. (b) Median error at 30\,dB with LS on one period, IV on one period, and
+LS on the mean of \mNRM{} periods.}
+\label{fig:prac}\end{figure}

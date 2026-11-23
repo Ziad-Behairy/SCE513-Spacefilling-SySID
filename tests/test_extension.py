@@ -36,3 +36,23 @@ def test_identified_model_free_run_is_bounded():
     Xt = system.steady_state_response(u)[0]
     Xh = surrogate.sim(theta, np.tile(u, cfg.P_PERIODS))[-cfg.N:]
     assert np.sqrt(np.mean((Xh[:, 0] - Xt[:, 0]) ** 2)) / Xt[:, 0].std() < 1.0   # sanity: finite, bounded, not diverged
+
+
+def test_peak_penalty_gradient():
+    from ext.run_peak_limited import objective
+    phi = signals.random_phases(3)
+    umax = 1.9 * cfg.U_STD
+    J, g = objective(phi, umax)
+    h = 1e-5
+    for i in (0, 77, 150):
+        p1, p2 = phi.copy(), phi.copy()
+        p1[i] += h; p2[i] -= h
+        fd = (objective(p1, umax)[0] - objective(p2, umax)[0]) / (2 * h)
+        assert abs(fd - g[i]) <= 1e-6 * max(1.0, np.max(np.abs(g)))
+
+
+def test_iv_estimator_recovers_noise_free_model():
+    from ext.run_noise_remedies import fit_iv, fit_ls, e_uni
+    u = signals.multisine(signals.random_phases(2))
+    X = system.steady_state_response(u)[0]
+    assert e_uni(fit_iv(u, X)) < 2 * e_uni(fit_ls(u, X)) + 0.02

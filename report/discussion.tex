@@ -8,12 +8,11 @@ seeds are unknown; we fixed our choices in the M2 protocol before seeing results
 influential ones ($\epsilon$, optimiser, budget, grid, initial state). (ii) H1 is supported by two
 independent budget-limited optimisers, but \texttt{fmincon}'s interior-point steps were not reproduced
 exactly; without MATLAB it remains a hypothesis. (iii) The Fig.~8 values of the paper were read from the
-axes. (iv) The extension uses one system, one model class and simulated white sensor noise. With noisy
-states in the regressors, least squares is biased (errors-in-variables, \citealp{Soderstrom2007}), and the
-target $(x_{2,k+1}-x_{2,k})/T_s$ amplifies the noise by $\sqrt2/T_s$. Because the sensor noise has a fixed
-absolute level, the bias is smaller for designs that spread the states more, so part of the noisy-case gain
-may come from a higher effective SNR; the noise-free case (\mFOfullinf$\times$) isolates the coverage effect.
-An instrumental-variable estimator would be the natural next step. (v) The surrogate design used short runs (20 iterations); longer runs on a fixed
+axes. (iv) The extension uses one system, one model class and simulated white sensor noise. Noisy states
+in the regressors could bias least squares (errors-in-variables, \citealp{Soderstrom2007}); E4 shows that this
+bias is small here and that the noise error is mostly variance, amplified by $\sqrt2/T_s$ in the target. With
+a fixed absolute noise level, designs that spread the states more also have a higher effective SNR; the
+noise-free case (\mFOfullinf$\times$) isolates the coverage effect. (v) The surrogate design used short runs (20 iterations); longer runs on a fixed
 surrogate helped little, and a second identification round appeared more useful (unequal budgets, not tested statistically). (vi) The converged
 optima depend on the machine (\S3), so only statistics over seeds, not single converged values, should be
 compared.

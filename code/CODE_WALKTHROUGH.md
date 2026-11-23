@@ -236,3 +236,21 @@ Runs the numbered workflow in order: M3 core (`main.py`), M4 + extension runs on
   tube along a helix from the anchor to the cart. Labels are placed by projecting 3-D points to pixels
   (`WorldToDisplay`), then drawn with Matplotlib.
 * `fig_states_3d.png`: the 2048 samples `z_k = [u, x1, x2]` of seed 0 (initial vs optimised) inside the box D_z.
+
+## E4a `ext/run_peak_limited.py`: design with an actuator peak limit
+Real actuators have a maximum force. We keep the paper's cost and add a penalty
+`rho * sum_k max(0, |u_k| - U_max)^2` with `U_max = CF_max * 160 N`. Its gradient w.r.t. u is
+`2 rho max(0,|u|-U_max) sign(u)`, which goes through the same `multisine_grad` chain to the phases
+(checked against finite differences in `tests/`). The amplitudes stay fixed, so the power is unchanged.
+Result: with CF ≤ 1.9 (Schroeder level) the model is still about 6x more accurate than with random phases (2.9% vs 2.3% error without the limit).
+
+## E4b `ext/run_noise_remedies.py`: bias or variance?
+* **Bias test:** fit the model on 15 noise draws, average the parameters, compare with the noise-free fit.
+  If the average is close to the noise-free fit, the error is variance (random), not bias (systematic).
+  For the optimised input it is: 3.9% single fit, 2.0% averaged, 1.8% noise-free.
+* **IV:** instruments = the same features built from the *previous* sample's states (lagged), with the
+  current input. White noise at k-1 is independent of the noise at k and k+1, but the lagged states are
+  still strongly correlated with the true states. Normal equations become `(Psi^T Phi + lam n I) theta = Psi^T y`.
+  It does not help, because there is little bias to remove.
+* **Periodic averaging:** the input is periodic, so measuring 4 periods and averaging them keeps the
+  signal and cuts the noise std by 2. This removes variance, and it helps the optimised designs a lot.

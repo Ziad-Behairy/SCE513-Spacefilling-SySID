@@ -345,8 +345,84 @@ def extension():
     return out
 
 
+# --------------------------------------------------------------------------- extension E4: practical limits
+def practical():
+    out = {}
+    nr = os.path.join(R, "ext_noise_remedies.json")
+    if os.path.exists(nr):
+        N = json.load(open(nr))
+        seeds = sorted(N["per_seed"], key=int)
+        for d in ("R", "S", "O20", "Ofull"):
+            for m in ("LS1", "IV1", "LSavg"):
+                v = [N["per_seed"][k][d][m] for k in seeds]
+                mac(f"NR_{d}_{m}", 100 * float(np.median(v)), "{:.1f}")
+            a = np.array([N["per_seed"][k][d]["LSavg"] for k in seeds]); b = np.array([N["per_seed"][k][d]["LS1"] for k in seeds])
+            mac(f"NRwin_{d}", str(int(np.sum(a < b))))
+            mac(f"NRp_{d}", "$<0.001$" if stats.wilcoxon(a, b, alternative="less").pvalue < 1e-3
+                else "$=%.3f$" % stats.wilcoxon(a, b, alternative="less").pvalue)
+            ai = np.array([N["per_seed"][k][d]["IV1"] for k in seeds])
+            mac(f"NRivwin_{d}", str(int(np.sum(ai < b))))
+        for d, v in N["split"].items():
+            for m in ("clean", "single_mean", "mean_theta"):
+                mac(f"Split_{d}_{m}", 100 * v[m], "{:.1f}")
+        mac("NRM", str(N["M"]))
+        out["noise"] = N
+    pk = loadfolder("ext_peak_limited")
+    if pk:
+        ext = {r["seed"]: r for r in loadfolder("ext")}
+        mac("NPeak", str(len(pk)))
+        for key, nm in (("inf", "Inf"), ("2.5", "TwoFive"), ("1.9", "OneNine")):
+            for m in ("CF", "e_uni", "e_sim160", "e_sim240", "C_true"):
+                v = np.array([r[key][m] for r in pk], float)
+                sc, f = (100, "{:.1f}") if m.startswith("e_") else (1, "{:.2f}" if m == "CF" else "{:.3g}")
+                mac(f"Pk_{nm}_{m}", sc * float(np.median(v)), f)
+            mac(f"Pk_{nm}_CFmax", float(max(r[key]["CF"] for r in pk)), "{:.2f}")
+            mac(f"Pk_{nm}_div", str(int(sum(r[key]["div"] for r in pk))))
+            rr = [ext[r["seed"]]["levels"]["40"]["R"]["e_uni"] / r[key]["e_uni"] for r in pk if r["seed"] in ext]
+            mac(f"Pk_{nm}_F", float(np.median(rr)), "{:.1f}")
+        # figure: practical limits
+        fig, ax = plt.subplots(1, 2, figsize=(7.0, 2.3))
+        keys = [("inf", "no limit"), ("2.5", "CF $\\leq$ 2.5"), ("1.9", "CF $\\leq$ 1.9")]
+        rv = [ext[r["seed"]]["levels"]["40"]["R"]["e_uni"] * 100 for r in pk]
+        sv = [ext[r["seed"]]["levels"]["40"]["S"]["e_uni"] * 100 for r in pk]
+        data = [rv, sv] + [[r[k]["e_uni"] * 100 for r in pk] for k, _ in keys]
+        cols = [COL["R"], COL["S"], "#e8590c", "#f08c4a", "#f4b183"]
+        labs = ["random", "Schroeder\nCF 1.88"] + [f"opt. 100 it.\n{l}" for _, l in keys]
+        for i, (d, c) in enumerate(zip(data, cols)):
+            ax[0].boxplot(d, positions=[i], widths=0.55, patch_artist=True, boxprops=dict(facecolor=c + "55", edgecolor=c),
+                          medianprops=dict(color=c, lw=1.4), whiskerprops=dict(color=c), capprops=dict(color=c),
+                          flierprops=dict(markeredgecolor=c, ms=2))
+        ax[0].set_xticks(range(5), labs, fontsize=6)
+        ax[0].set_yscale("log"); ax[0].set_ylabel("$e_{\\mathrm{uni}}$ [%] (40 dB)"); ax[0].grid(alpha=0.3, axis="y")
+        ax[0].set_title("(a) actuator peak limit", fontsize=8)
+        from matplotlib.ticker import FuncFormatter, LogLocator
+        for a_ in ax:
+            a_.yaxis.set_major_locator(LogLocator(subs=(1, 2, 5)))
+            a_.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+            a_.yaxis.set_minor_formatter(FuncFormatter(lambda v, _: ""))
+        if "noise" in out:
+            N = out["noise"]; seeds = sorted(N["per_seed"], key=int)
+            ds = ["R", "S", "O20", "Ofull"]; ms = [("LS1", "LS, 1 period"), ("IV1", "IV, 1 period"), ("LSavg", f"LS, mean of {N['M']} periods")]
+            w = 0.26
+            for j, (m, lab) in enumerate(ms):
+                med = [np.median([N["per_seed"][k][d][m] for k in seeds]) * 100 for d in ds]
+                ax[1].bar(np.arange(4) + (j - 1) * w, med, w, label=lab, color=["#8d99a6", "#2a9d8f", "#264653"][j])
+            ax[1].set_xticks(range(4), [LAB[d] for d in ds], fontsize=7)
+            ax[1].set_yscale("log"); ax[1].set_ylabel("median $e_{\\mathrm{uni}}$ [%] (30 dB)")
+            ax[1].legend(fontsize=6, frameon=False); ax[1].grid(alpha=0.3, axis="y")
+            ax[1].set_title("(b) noise: IV vs. periodic averaging", fontsize=8)
+        for a_ in ax:
+            a_.yaxis.set_major_locator(LogLocator(subs=(1, 2, 5)))
+            a_.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+            a_.yaxis.set_minor_formatter(FuncFormatter(lambda v, _: ""))
+        fig.tight_layout()
+        fig.savefig(os.path.join(R, "fig_ext_practical.png"), dpi=250)
+        plt.close(fig)
+    return out
+
+
 if __name__ == "__main__":
-    S = {"repro": repro(), "ext": extension()}
+    S = {"repro": repro(), "ext": extension(), "practical": practical()}
     with open(os.path.join(R, "numbers_m4.tex"), "w") as fh:
         fh.write("% generated by m4_analysis.py -- do not edit by hand\n")
         for k, v in MAC.items():

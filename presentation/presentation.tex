@@ -124,12 +124,18 @@ Price: on random-phase test signals at the design level the random model is bett
 \mXOfullfortyesimonesixty\,\%); at 1.5$\times$ amplitude it fails (\mXRfortyesimtwoforty\,\% vs.\ \mXOfullfortyesimtwoforty\,\%).
 \end{frame}
 
+\begin{frame}{Practical limits (E4)}
+\centering\includegraphics[width=0.95\textwidth]{fig_ext_practical.png}\\
+\small Actuator peak limit at the Schroeder crest factor: still \mPkOneNineF$\times$ better than random.
+Noise error is variance, not bias: IV does not help, averaging \mNRM{} periods does.
+\end{frame}
+
 \begin{frame}{Limitations}
 \begin{itemize}
 \item H1 supported, not proven: authors' optimiser options unknown.
 \item $\epsilon$, steady-state rule, Schroeder index: my choices (fixed before results, M2).
-\item Extension: one system, one model class, simulated sensor noise; noisy regressors give
-errors-in-variables bias, smaller for designs that spread the states (noise-free case isolates coverage).
+\item Extension: one system, one model class, simulated sensor noise; the noise error is mostly
+variance, not errors-in-variables bias (E4).
 \item Surrogate design: 20 iterations; 100 iterations on a fixed surrogate helped little; re-identify instead.
 \item Converged optima differ across machines (round-off grows along the path): compare statistics, not single runs.
 \end{itemize}
