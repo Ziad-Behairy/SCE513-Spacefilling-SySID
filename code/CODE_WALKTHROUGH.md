@@ -254,3 +254,33 @@ Result: with CF ≤ 1.9 (Schroeder level) the model is still about 6x more accur
   It does not help, because there is little bias to remove.
 * **Periodic averaging:** the input is periodic, so measuring 4 periods and averaging them keeps the
   signal and cuts the noise std by 2. This removes variance, and it helps the optimised designs a lot.
+
+## M5 add-on: validation on a robot gimbal axis (`code/gimbal/`)
+
+Not part of the M4 report. Question: does the surrogate-in-the-loop design still help on a second,
+more realistic system, and does a better model matter for a control task?
+
+- `gimbal.py`: everything for the second system in one file.
+  - Plant: `J dw/dt = tau - MGL sin(theta) - tau_stop(theta) - B w - TC tanh(w/V0)`
+    (gravity, rubber bumpers at +-1 rad, viscous + smooth Coulomb friction), forward Euler, Ts = 0.01 s.
+  - `g_true`, `g_hat`: acceleration and its derivatives for the true plant and for the RBF model
+    (same model class as `ext/ident.py`). `simulate` and `backward` are the same forward/adjoint
+    recursions as `system.py`, written once for both (flag `use_hat`).
+  - `objective(phi, theta, use_hat, grid)`: paper cost (Eqs. 7-8) and exact phase gradient. The only
+    new idea is the `grid` argument: the 20^3 box (paper) or a set of task points.
+  - `task_points(refs, theta, ...)`: the operating points [u, theta, w] a controller will visit while
+    following reference motions; u is found from the IDENTIFIED model (no true plant needed).
+  - `track(ref, theta, ...)`: computed-torque controller (a_des = ref'' + kp e + kd e', then solve
+    model_acc(u, x) = a_des for u by coarse search + Newton, |u| <= 5 N m) run on the TRUE plant.
+- `run_gimbal.py`: for 10 seeds, designs R (random), S (Schroeder), Osur (box, designed on the model
+  from the R experiment) and Otask (task grid, same model); identify each with 40 dB noise; test on
+  20000 uniform points, beyond-limit points, and tracking of 5 test motions per task (A normal, B
+  aggressive; both defined before any run; design motions use other seeds than test motions).
+- `analyse_gimbal.py`: `results/gimbal/fig_gimbal.png` and `summary.json` (medians, wins, Wilcoxon).
+- Test: `tests/test_extension.py::test_gimbal_gradients_match_finite_differences`.
+
+Result in one line: the box design gives a ~2x better model over the box but a worse controller for
+normal motions (the centre is left with less data); the task grid gives -33 % tracking error on
+aggressive motions (9/10 seeds). Lesson: fill the space the task will use.
+
+`video/make_story.py`: M5 video (no new results; numbers read from `results/`).

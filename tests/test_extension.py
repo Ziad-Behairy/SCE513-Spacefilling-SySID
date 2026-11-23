@@ -56,3 +56,18 @@ def test_iv_estimator_recovers_noise_free_model():
     u = signals.multisine(signals.random_phases(2))
     X = system.steady_state_response(u)[0]
     assert e_uni(fit_iv(u, X)) < 2 * e_uni(fit_ls(u, X)) + 0.02
+
+
+def test_gimbal_gradients_match_finite_differences():
+    """M5 add-on (code/gimbal): adjoint gradient of the space-filling cost through the
+    true gimbal plant and through an identified model, box grid and task grid."""
+    from gimbal import gimbal as G
+    phi = G.random_phases(3)
+    theta = G.identify(G.multisine(phi), G.steady(G.multisine(phi)))
+    task = G.task_points([G.reference(3000, "A")], theta, True, n=300)
+    d = np.random.default_rng(4).standard_normal(phi.size)
+    for th, hat, grid in [(G._NO, False, G.GRID), (theta, True, G.GRID), (theta, True, task)]:
+        C, g = G.objective(phi, th, hat, grid)
+        h = 1e-6
+        fd = (G.objective(phi + h * d, th, hat, grid)[0] - G.objective(phi - h * d, th, hat, grid)[0]) / (2 * h)
+        assert abs(fd - g @ d) <= 1e-5 * max(1.0, abs(fd))
